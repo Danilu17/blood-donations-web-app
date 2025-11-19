@@ -12,7 +12,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { register } from "../../services/authService";
+import { register as registerUser } from "../../services/authService";
 
 function Register() {
   const navigate = useNavigate();
@@ -21,14 +21,15 @@ function Register() {
     last_name: "",
     dni: "",
     birth_date: "",
-    sex: "",
+    gender: "",
     email: "",
     phone: "",
     address: "",
     password: "",
     confirmPassword: "",
-    acceptedConsent: false,
+    accepts_terms: false,
   });
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
@@ -46,39 +47,41 @@ function Register() {
     setErrorMsg("");
     setInfoMsg("");
 
-    if (!form.acceptedConsent) {
-      setErrorMsg(
+    if (!form.accepts_terms) {
+      return setErrorMsg(
         "Debés aceptar el consentimiento informado para registrarte.",
       );
-      return;
     }
 
     if (form.password !== form.confirmPassword) {
-      setErrorMsg("Las contraseñas no coinciden.");
-      return;
+      return setErrorMsg("Las contraseñas no coinciden.");
     }
 
     setLoading(true);
     try {
-      await register({
+      await registerUser({
         first_name: form.first_name,
         last_name: form.last_name,
         dni: form.dni,
         birth_date: form.birth_date,
-        sex: form.sex,
+        gender: form.gender,
         email: form.email,
         phone: form.phone,
         address: form.address,
         password: form.password,
+        accepts_terms: form.accepts_terms,
       });
+
       setInfoMsg(
         "Registro exitoso. Revisá tu correo para verificar la cuenta antes de iniciar sesión.",
       );
+
       setTimeout(() => navigate("/login"), 2500);
     } catch (error) {
       const msg =
         error?.response?.data?.message ||
         "Error al registrarse. Verificá los datos.";
+
       setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
     } finally {
       setLoading(false);
@@ -93,6 +96,7 @@ function Register() {
         alignItems: "center",
         justifyContent: "center",
         bgcolor: "#f3f4f6",
+        p: 3,
       }}
     >
       <Paper sx={{ width: 500, p: 4, borderRadius: 2, boxShadow: 3 }}>
@@ -108,7 +112,6 @@ function Register() {
               name="first_name"
               value={form.first_name}
               onChange={handleChange}
-              margin="normal"
               required
             />
             <TextField
@@ -117,7 +120,6 @@ function Register() {
               name="last_name"
               value={form.last_name}
               onChange={handleChange}
-              margin="normal"
               required
             />
           </Box>
@@ -132,7 +134,7 @@ function Register() {
             required
           />
 
-          <Box display="flex" gap={2}>
+          <Box display="flex" gap={2} mb={0}>
             <TextField
               fullWidth
               type="date"
@@ -140,23 +142,22 @@ function Register() {
               name="birth_date"
               value={form.birth_date}
               onChange={handleChange}
-              margin="normal"
               InputLabelProps={{ shrink: true }}
               required
             />
+
             <TextField
               select
               fullWidth
-              label="Sexo"
-              name="sex"
-              value={form.sex}
+              label="Género"
+              name="gender"
+              value={form.gender}
               onChange={handleChange}
-              margin="normal"
               required
             >
-              <MenuItem value="M">Masculino</MenuItem>
-              <MenuItem value="F">Femenino</MenuItem>
-              <MenuItem value="X">Otro / No binario</MenuItem>
+              <MenuItem value="female">Femenino</MenuItem>
+              <MenuItem value="male">Masculino</MenuItem>
+              <MenuItem value="other">Otro / No binario</MenuItem>
             </TextField>
           </Box>
 
@@ -214,11 +215,32 @@ function Register() {
             />
           </Box>
 
+          {/* Consentimiento informado */}
+          <Box
+            sx={{
+              backgroundColor: "#fff7e6",
+              border: "1px solid #ffe0b2",
+              borderRadius: 1,
+              p: 2,
+              mt: 2,
+              fontSize: "0.85rem",
+            }}
+          >
+            <strong>Consentimiento informado:</strong>
+            <p>
+              Autorizo el uso de mis datos personales para la creación y gestión
+              de mi cuenta, de acuerdo con la Ley de Protección de Datos
+              Personales. Comprendo que mi información será utilizada para
+              validar mi identidad, registrar donaciones y comunicarme sobre
+              campañas relevantes.
+            </p>
+          </Box>
+
           <FormControlLabel
             control={
               <Checkbox
-                name="acceptedConsent"
-                checked={form.acceptedConsent}
+                name="accepts_terms"
+                checked={form.accepts_terms}
                 onChange={handleChange}
               />
             }
