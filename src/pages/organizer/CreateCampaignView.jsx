@@ -1,15 +1,13 @@
-import CreateCampaignForm from "./CreateCampaignForm";
-import { useCreateCampaign } from "./hooks/useCreateCampaign";
-
+import CampaignForm from "../../components/forms/CampaignForm.jsx";
 function CreateCampaignView() {
-  const { form, onSubmit, centers, isLoading } = useCreateCampaign();
+  const fake = { form: {}, onSubmit: () => {}, isLoading: false };
 
   return (
-    <CreateCampaignForm
-      form={form}
-      onSubmit={onSubmit}
-      centers={centers}
-      isLoading={isLoading}
+    <CampaignForm
+      form={fake.form}
+      onSubmit={fake.onSubmit}
+      isLoading={fake.isLoading}
+      organizerId={"organizer-123"}
     />
   );
 }

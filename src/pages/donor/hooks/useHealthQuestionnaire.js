@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
-
+//apis/questionnaire.api.js cuando tengas el módulo en backend.
 export function useHealthQuestionnaire() {
   const user = useSelector((state) => state.user);
 

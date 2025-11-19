@@ -1,18 +1,15 @@
 export const BLOOD_TYPE_OPTIONS = [
-  { value: "A+", label: "A+" },
-  { value: "A-", label: "A-" },
-  { value: "B+", label: "B+" },
-  { value: "B-", label: "B-" },
-  { value: "AB+", label: "AB+" },
-  { value: "AB-", label: "AB-" },
-  { value: "O+", label: "O+" },
-  { value: "O-", label: "O-" },
+  { value: "A", label: "A" },
+  { value: "B", label: "B" },
+  { value: "AB", label: "AB" },
+  { value: "O", label: "O" },
 ];
 
 export const USER_ROLE_OPTIONS = [
   { value: "donor", label: "Donante" },
+  { value: "beneficiary", label: "Beneficiario" },
   { value: "organizer", label: "Organizador" },
-  { value: "volunteer", label: "Voluntario" },
+  { value: "admin", label: "Administrador" },
 ];
 
 export const CAMPAIGN_STATUS_OPTIONS = [
@@ -20,6 +17,7 @@ export const CAMPAIGN_STATUS_OPTIONS = [
   { value: "active", label: "Activa" },
   { value: "completed", label: "Completada" },
   { value: "cancelled", label: "Cancelada" },
+  { value: "proposed", label: "Propuesta" },
 ];
 
 export const DONATION_STATUS_OPTIONS = [
@@ -30,16 +28,16 @@ export const DONATION_STATUS_OPTIONS = [
 ];
 
 // Mapas para colores de chips
-export const CAMPAIGN_STATUS_COLORS = {
-  scheduled: "info",
-  active: "success",
-  completed: "default",
-  cancelled: "error",
-};
+// export const CAMPAIGN_STATUS_COLORS = {
+//   scheduled: "info",
+//   active: "success",
+//   completed: "default",
+//   cancelled: "error",
+// };
 
-export const DONATION_STATUS_COLORS = {
-  scheduled: "warning",
-  completed: "success",
-  cancelled: "error",
-  no_show: "default",
-};
+// export const DONATION_STATUS_COLORS = {
+//   scheduled: "warning",
+//   completed: "success",
+//   cancelled: "error",
+//   no_show: "default",
+// };

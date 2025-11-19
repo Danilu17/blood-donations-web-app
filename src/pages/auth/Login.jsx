@@ -1,108 +1,114 @@
+// src/pages/auth/Login.jsx
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
+  Box,
   Button,
-  InputAdornment,
-  IconButton,
-  CircularProgress,
+  TextField,
   Typography,
   Paper,
-  Box,
+  CircularProgress,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { FormProvider } from "react-hook-form";
-
-import FormTextField from "../../components/forms/FormTextField";
-import useLogin from "./hooks/useLogin";
-import styles from "./Login.module.css";
+import { login } from "../../services/authService";
 
 function Login() {
-  const [showPassword, setShowPassword] = useState(false);
-  const { methods, onSubmit, isSubmitting } = useLogin();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setLoading(true);
+    try {
+      await login(form.email, form.password);
+      navigate("/"); // redirigir al dashboard principal
+    } catch (error) {
+      const msg =
+        error?.response?.data?.message ||
+        "Error al iniciar sesión. Verificá tus datos.";
+      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className={styles.loginContainer}>
-      <Paper className={styles.loginCard} elevation={3}>
-        {/* Header */}
-        <div className={styles.loginHeader}>
-          <Typography variant="h4" className={styles.loginTitle}>
-            🩸 DonaHoy
-          </Typography>
-          <Typography variant="body1" className={styles.loginSubtitle}>
-            Sistema de Gestión de Donación de Sangre
-          </Typography>
-        </div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "#f3f4f6",
+      }}
+    >
+      <Paper
+        sx={{
+          width: 400,
+          p: 4,
+          borderRadius: 2,
+          boxShadow: 3,
+        }}
+      >
+        <Typography variant="h5" mb={2} textAlign="center">
+          Iniciar sesión
+        </Typography>
 
-        {/* Form */}
-        <FormProvider {...methods}>
-          <form
-            className={styles.loginForm}
-            onSubmit={methods.handleSubmit(onSubmit)}
-            noValidate
+        <form onSubmit={handleSubmit}>
+          <TextField
+            fullWidth
+            label="Correo electrónico"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Contraseña"
+            name="password"
+            type="password"
+            value={form.password}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+
+          {errorMsg && (
+            <Typography color="error" variant="body2" mt={1}>
+              {errorMsg}
+            </Typography>
+          )}
+
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            sx={{ mt: 2 }}
+            disabled={loading}
           >
-            <FormTextField
-              name="email"
-              label="Correo electrónico"
-              variant="outlined"
-              type="email"
-              rules={{ required: "El correo electrónico es requerido" }}
-            />
+            {loading ? <CircularProgress size={22} /> : "Entrar"}
+          </Button>
+        </form>
 
-            <FormTextField
-              name="password"
-              label="Contraseña"
-              variant="outlined"
-              type={showPassword ? "text" : "password"}
-              rules={{ required: "La contraseña es requerida" }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={isSubmitting}
-              sx={{
-                backgroundColor: "#dc2626",
-                "&:hover": { backgroundColor: "#b91c1c" },
-                mt: 1,
-              }}
-            >
-              {isSubmitting ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "Iniciar sesión"
-              )}
-            </Button>
-          </form>
-        </FormProvider>
-
-        {/* Credenciales mock */}
-        <Box className={styles.loginFooter}>
-          <Typography variant="body2">Credenciales de prueba:</Typography>
-          <Typography variant="caption">
-            donor@example.com / password
+        <Box mt={2} display="flex" justifyContent="space-between">
+          <Typography variant="body2">
+            ¿No tenés cuenta? <Link to="/register">Registrate</Link>
           </Typography>
-          <Typography variant="caption">
-            organizer@example.com / password
-          </Typography>
-          <Typography variant="caption">
-            volunteer@example.com / password
+          <Typography variant="body2">
+            <Link to="/forgot-password">Olvidé mi contraseña</Link>
           </Typography>
         </Box>
       </Paper>
-    </div>
+    </Box>
   );
 }
 

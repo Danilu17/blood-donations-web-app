@@ -1,5 +1,4 @@
 import { useForm } from "react-hook-form";
-import { MOCK_CENTERS } from "../../../mocks/centers.mocks";
 
 export function useCreateCampaign() {
   const form = useForm({
@@ -26,7 +25,7 @@ export function useCreateCampaign() {
   return {
     form,
     onSubmit,
-    centers: MOCK_CENTERS.map((c) => ({ label: c.name, value: c.id })),
+    centers: [], // TODO: traer centros del backend
     isLoading: false,
   };
 }
