@@ -1,5 +1,5 @@
 // src/pages/donor/MyDonationsView.jsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Paper,
@@ -12,44 +12,53 @@ import {
   TableBody,
   Button,
 } from "@mui/material";
-import { getMyDonations } from "../../services/donationService";
-import { downloadDonationCertificate } from "../../services/certificateService";
+import { useGetMyDonationsQuery } from "../../apis/donations.api";
+import { useLazyDownloadCertificateQuery } from "../../apis/certificates.api";
+
+const getErrorMessage = (error, fallback) => {
+  if (!error) return fallback;
+  const data = error.data;
+  let msg =
+    data?.message ||
+    (typeof error.error === "string" && error.error) ||
+    fallback;
+  return Array.isArray(msg) ? msg.join(", ") : msg;
+};
 
 function MyDonationsView() {
-  const [donations, setDonations] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState(null);
-  const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const data = await getMyDonations();
-        setDonations(data.results || data.items || data.data || data || []);
-      } catch (error) {
-        const msg =
-          error?.response?.data?.message ||
-          "Error al cargar historial de donaciones.";
-        setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const { data, isLoading, error } = useGetMyDonationsQuery();
+
+  const [triggerDownload] = useLazyDownloadCertificateQuery();
+
+  const donations = data?.results || data?.items || data?.data || data || [];
+
+  const errorMsg = error
+    ? getErrorMessage(error, "Error al cargar historial de donaciones.")
+    : "";
 
   const handleDownload = async (id) => {
     setDownloadingId(id);
     try {
-      await downloadDonationCertificate(id);
-    } catch {
-      // podrías mostrar un error
+      const blob = await triggerDownload(id).unwrap();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `certificado-donacion-${id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      // opcional: podrías mostrar un error en pantalla
+      console.error("Error descargando certificado", e);
     } finally {
       setDownloadingId(null);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box p={3} textAlign="center">
         <CircularProgress />

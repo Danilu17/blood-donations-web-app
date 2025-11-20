@@ -11,12 +11,22 @@ import {
   Alert,
 } from "@mui/material";
 import {
-  createHealthQuestionnaire,
-  getMyLastQuestionnaire,
-} from "../../services/questionnaireService";
+  useGetMyLastQuestionnaireQuery,
+  useCreateHealthQuestionnaireMutation,
+} from "../../apis/questionnaire.api";
 
 const BLOOD_TYPES = ["A", "B", "AB", "0"];
 const RH_FACTORS = ["+", "-"];
+
+const getErrorMessage = (error, fallback) => {
+  if (!error) return fallback;
+  const data = error.data;
+  let msg =
+    data?.message ||
+    (typeof error.error === "string" && error.error) ||
+    fallback;
+  return Array.isArray(msg) ? msg.join(", ") : msg;
+};
 
 function HealthQuestionnairePage() {
   const [form, setForm] = useState({
@@ -27,26 +37,37 @@ function HealthQuestionnairePage() {
     blood_type: "",
     rh_factor: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [loadingLast, setLoadingLast] = useState(true);
   const [eligibility, setEligibility] = useState(null);
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // RTK Query
+  const { data: lastQuestionnaire, isLoading: loadingLast } =
+    useGetMyLastQuestionnaireQuery();
+
+  const [
+    createHealthQuestionnaire,
+    { isLoading: submitting, error: submitError },
+  ] = useCreateHealthQuestionnaireMutation();
+
   useEffect(() => {
-    (async () => {
-      try {
-        const last = await getMyLastQuestionnaire();
-        if (last) {
-          setEligibility(last.eligibility_status || last.status);
-        }
-      } catch {
-        // si no hay historial, no pasa nada
-      } finally {
-        setLoadingLast(false);
-      }
-    })();
-  }, []);
+    if (lastQuestionnaire) {
+      setEligibility(
+        lastQuestionnaire.eligibility_status || lastQuestionnaire.status,
+      );
+    }
+  }, [lastQuestionnaire]);
+
+  useEffect(() => {
+    if (submitError) {
+      setErrorMsg(
+        getErrorMessage(
+          submitError,
+          "Error al enviar el cuestionario. Intentalo de nuevo.",
+        ),
+      );
+    }
+  }, [submitError]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,22 +94,20 @@ function HealthQuestionnairePage() {
 
     if (!validate()) return;
 
-    setLoading(true);
     try {
       const res = await createHealthQuestionnaire({
         ...form,
         weight: Number(form.weight),
-      });
+      }).unwrap();
       const status = res.eligibility_status || res.status;
       setEligibility(status);
       setMessage("Cuestionario enviado correctamente.");
     } catch (error) {
-      const msg =
-        error?.response?.data?.message ||
-        "Error al enviar el cuestionario. Intentalo de nuevo.";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
-    } finally {
-      setLoading(false);
+      const msg = getErrorMessage(
+        error,
+        "Error al enviar el cuestionario. Intentalo de nuevo.",
+      );
+      setErrorMsg(msg);
     }
   };
 
@@ -201,9 +220,13 @@ function HealthQuestionnairePage() {
             type="submit"
             variant="contained"
             sx={{ mt: 2 }}
-            disabled={loading}
+            disabled={submitting}
           >
-            {loading ? <CircularProgress size={22} /> : "Guardar cuestionario"}
+            {submitting ? (
+              <CircularProgress size={22} />
+            ) : (
+              "Guardar cuestionario"
+            )}
           </Button>
         </form>
       </Paper>

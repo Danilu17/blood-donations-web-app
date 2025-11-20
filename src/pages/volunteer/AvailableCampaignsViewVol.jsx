@@ -1,3 +1,4 @@
+// src/pages/volunteer/AvailableCampaignsView.jsx
 import {
   Box,
   Typography,
@@ -14,26 +15,23 @@ import {
   AccessTime,
   People,
 } from "@mui/icons-material";
-import {
-  useGetActiveCampaignsQuery,
-  useRegisterVolunteerMutation,
-} from "../../apis/campaigns.api";
 import { useSelector } from "react-redux";
+import { useGetPublicCampaignsQuery } from "../../apis/campaigns.api";
+import { useRegisterVolunteerMutation } from "../../apis/volunteers.api";
 
-function AvailableCampaignsView() {
+function AvailableCampaignsViewVol() {
   const userId = useSelector((state) => state.user.id);
-  const {
-    data: campaigns = [],
-    isLoading,
-    isError,
-  } = useGetActiveCampaignsQuery();
+
+  const { data, isLoading, isError } = useGetPublicCampaignsQuery();
+  const campaigns = data?.results || data?.items || data?.data || data || [];
+
   const [registerVolunteer] = useRegisterVolunteerMutation();
 
   const handleRegister = async (campaignId) => {
     try {
       await registerVolunteer({
         volunteerId: userId,
-        campaignId: campaignId,
+        campaignId,
         availability_hours: "Tiempo completo",
         special_skills: "",
       }).unwrap();
@@ -62,7 +60,7 @@ function AvailableCampaignsView() {
 
       <Grid container spacing={3}>
         {campaigns.map((campaign) => (
-          <Grid key={campaign.id} size={{ xs: 12, md: 6, lg: 4 }}>
+          <Grid item xs={12} md={6} lg={4} key={campaign.id}>
             <Card sx={{ height: "100%", boxShadow: 2 }}>
               <CardContent>
                 <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -79,13 +77,17 @@ function AvailableCampaignsView() {
 
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <LocationOn sx={{ mr: 1, fontSize: 18 }} />
-                  <Typography variant="body2">{campaign.location}</Typography>
+                  <Typography variant="body2">
+                    {campaign.center_name || campaign.location}
+                  </Typography>
                 </Box>
 
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <CalendarMonth sx={{ mr: 1, fontSize: 18 }} />
                   <Typography variant="body2">
-                    {new Date(campaign.start_date).toLocaleDateString()}
+                    {campaign.date
+                      ? campaign.date
+                      : new Date(campaign.start_date).toLocaleDateString()}
                   </Typography>
                 </Box>
 
@@ -128,7 +130,7 @@ function AvailableCampaignsView() {
       </Grid>
 
       {campaigns.length === 0 && (
-        <Paper sx={{ p: 4, textAlign: "center" }}>
+        <Paper sx={{ p: 4, textAlign: "center", mt: 3 }}>
           <Typography variant="h6" gutterBottom>
             No hay campañas activas
           </Typography>
@@ -141,4 +143,4 @@ function AvailableCampaignsView() {
   );
 }
 
-export default AvailableCampaignsView;
+export default AvailableCampaignsViewVol;

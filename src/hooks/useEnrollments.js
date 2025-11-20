@@ -1,24 +1,11 @@
-// src/hooks/useEnrollments.js
-import { useState, useEffect } from "react";
-import api from "../services/api";
+import { useGetEnrollmentsQuery } from "../apis/enrollments.api";
 
 export default function useEnrollments() {
-  const [enrollments, setEnrollments] = useState([]);
-  const [isLoading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { data, isLoading, error } = useGetEnrollmentsQuery();
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await api.get("/enrollments");
-        setEnrollments(data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  return { enrollments, isLoading, error };
+  return {
+    enrollments: data?.data || data || [],
+    isLoading,
+    error,
+  };
 }

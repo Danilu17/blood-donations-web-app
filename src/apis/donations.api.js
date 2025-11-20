@@ -1,61 +1,47 @@
+// src/apis/donations.api.js
 import { baseApi } from "./base.api";
 
 export const donationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Programar donación
+    getMyDonations: builder.query({
+      query: () => ({
+        url: "/donations/me",
+        method: "GET",
+      }),
+      providesTags: ["Donations"],
+    }),
+
+    getDonationsByCampaign: builder.query({
+      query: (campaignId) => ({
+        url: `/donations/campaign/${campaignId}`,
+        method: "GET",
+      }),
+      providesTags: ["Donations"],
+    }),
+
     scheduleDonation: builder.mutation({
       query: (body) => ({
-        url: `/donations`,
+        url: "/donations",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["donations", "campaigns"],
+      invalidatesTags: ["Donations"],
     }),
 
-    // Obtener todas las donaciones
-    getDonations: builder.query({
-      query: () => ({
-        url: `/donations`,
-        method: "GET",
-      }),
-      providesTags: ["donations"],
-    }),
-
-    // Obtener donaciones por donante
-    getDonationsByDonor: builder.query({
-      query: (donorId) => ({
-        url: `/donations/donor/${donorId}`,
-        method: "GET",
-      }),
-      providesTags: ["donations"],
-    }),
-
-    // Completar donación
     completeDonation: builder.mutation({
-      query: ({ id, quantity_ml }) => ({
+      query: ({ id, units }) => ({
         url: `/donations/${id}/complete`,
         method: "PATCH",
-        body: { quantity_ml },
+        body: { units },
       }),
-      invalidatesTags: ["donations"],
-    }),
-
-    // Generar certificado
-    generateCertificate: builder.query({
-      query: (donationId) => ({
-        url: `/donations/${donationId}/certificate`,
-        method: "GET",
-      }),
-      providesTags: ["certificates"],
+      invalidatesTags: ["Donations"],
     }),
   }),
-  overrideExisting: false,
 });
 
 export const {
+  useGetMyDonationsQuery,
+  useGetDonationsByCampaignQuery,
   useScheduleDonationMutation,
-  useGetDonationsQuery,
-  useGetDonationsByDonorQuery,
   useCompleteDonationMutation,
-  useGenerateCertificateQuery,
 } = donationsApi;

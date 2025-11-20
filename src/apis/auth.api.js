@@ -1,17 +1,54 @@
+// src/apis/auth.api.js
 import { baseApi } from "./base.api";
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Login de usuario
-    loginUser: builder.mutation({
-      query: (credentials) => ({
-        url: `/auth/login`,
+    login: builder.mutation({
+      query: ({ email, password }) => ({
+        url: "/auth/login",
         method: "POST",
-        body: credentials,
+        body: { email, password },
       }),
+      invalidatesTags: ["Auth"],
+    }),
+
+    register: builder.mutation({
+      query: (body) => ({
+        url: "/auth/register",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
+
+    forgotPassword: builder.mutation({
+      query: ({ email }) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body: { email },
+      }),
+      invalidatesTags: ["Auth"],
+    }),
+
+    resetPassword: builder.mutation({
+      query: ({ token, newPassword }) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body: { token, new_password: newPassword },
+      }),
+      invalidatesTags: ["Auth"],
     }),
   }),
-  overrideExisting: false,
 });
 
-export const { useLoginUserMutation } = authApi;
+// hooks generados por RTK Query
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+} = authApi;
+
+// 👇 Aliases para ser compatibles con tu código actual
+export const useLoginUserMutation = authApi.useLoginMutation;
+export const useRegisterUserMutation = authApi.useRegisterMutation;

@@ -1,72 +1,59 @@
+// src/apis/campaigns.api.js
 import { baseApi } from "./base.api";
 
 export const campaignsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Crear campaña
-    createCampaign: builder.mutation({
-      query: (body) => ({
-        url: `/campaigns`,
-        method: "POST",
-        body,
+    getPublicCampaigns: builder.query({
+      query: () => ({
+        url: "/campaigns/public",
+        method: "GET",
       }),
-      invalidatesTags: ["campaigns"],
+      providesTags: ["Campaigns"],
     }),
 
-    // Obtener todas las campañas
     getCampaigns: builder.query({
       query: () => ({
-        url: `/campaigns`,
+        url: "/campaigns",
         method: "GET",
       }),
-      providesTags: ["campaigns"],
+      providesTags: ["Campaigns"],
     }),
 
-    // Obtener campañas activas
-    getActiveCampaigns: builder.query({
-      query: () => ({
-        url: `/campaigns/active`,
-        method: "GET",
-      }),
-      providesTags: ["campaigns"],
-    }),
-
-    // Obtener campaña por ID
     getCampaignById: builder.query({
       query: (id) => ({
         url: `/campaigns/${id}`,
         method: "GET",
       }),
-      providesTags: ["campaigns"],
+      providesTags: ["Campaigns"],
     }),
 
-    // Registrar voluntario
-    registerVolunteer: builder.mutation({
+    createCampaign: builder.mutation({
       query: (body) => ({
-        url: `/campaigns/volunteers`,
+        url: "/campaigns",
         method: "POST",
         body,
       }),
-      invalidatesTags: ["campaigns", "volunteers"],
+      invalidatesTags: ["Campaigns"],
     }),
 
-    // 📌 Agendar donación
-    scheduleDonation: builder.mutation({
-      query: (body) => ({
-        url: `/donations/schedule`,
+    enrollToCampaign: builder.mutation({
+      query: ({ campaignId, schedule }) => ({
+        url: `/campaigns/${campaignId}/enroll`,
         method: "POST",
-        body,
+        body: { schedule },
       }),
-      invalidatesTags: ["campaigns", "donations"],
+      invalidatesTags: ["Campaigns", "Enrollments"],
     }),
   }),
-  overrideExisting: false,
 });
 
 export const {
-  useCreateCampaignMutation,
+  useGetPublicCampaignsQuery,
   useGetCampaignsQuery,
-  useGetActiveCampaignsQuery,
   useGetCampaignByIdQuery,
-  useRegisterVolunteerMutation,
-  useScheduleDonationMutation,
+  useCreateCampaignMutation,
+  useEnrollToCampaignMutation,
 } = campaignsApi;
+
+// 🔁 Alias para compatibilidad con código viejo
+export { useGetPublicCampaignsQuery as useGetActiveCampaignsQuery };

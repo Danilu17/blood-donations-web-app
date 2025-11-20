@@ -12,11 +12,11 @@ import ResetPassword from "../pages/auth/ResetPassword.jsx";
 import ErrorPage from "../pages/errorPage.jsx";
 
 // Donor pages
+import AvailableCampaignsViewDon from "../pages/donor/AvailableCampaignssViewDon.jsx";
 import MyDonationsView from "../pages/donor/MyDonationsView.jsx";
 import HealthQuestionnairePage from "../pages/donor/HealthQuestionnairePage.jsx";
 
 // Shared pages
-import AvailableCampaignsView from "../pages/volunteer/AvailableCampaignsView.jsx";
 import ProfileView from "../pages/profile/ProfileView.jsx";
 
 // Organizer pages
@@ -25,6 +25,7 @@ import DonationsManagementView from "../pages/organizer/DonationsManagementView.
 import RegistrationsView from "../pages/organizer/RegistrationsView.jsx";
 
 // Volunteer pages
+import AvailableCampaignsViewVol from "../pages/volunteer/AvailableCampaignsViewVol.jsx";
 import MyRegistrationsView from "../pages/volunteer/MyRegistrationsView.jsx";
 
 /**
@@ -73,7 +74,7 @@ export const routes = [
       { path: "register", element: <Register /> },
       { path: "forgot-password", element: <ForgotPassword /> },
 
-      // NUEVO → RESET PASSWORD CON TOKEN EN LA URL
+      // RESET PASSWORD CON TOKEN EN LA URL
       { path: "reset-password/:token", element: <ResetPassword /> },
 
       // RUTAS PROTEGIDAS
@@ -89,8 +90,8 @@ export const routes = [
           {
             path: "donor",
             children: [
-              { index: true, element: <AvailableCampaignsView /> },
-              { path: "campaigns", element: <AvailableCampaignsView /> },
+              { index: true, element: <AvailableCampaignsViewDon /> },
+              { path: "campaigns", element: <AvailableCampaignsViewDon /> },
               { path: "my-donations", element: <MyDonationsView /> },
               {
                 path: "health-questionnaire",
@@ -106,7 +107,8 @@ export const routes = [
           {
             path: "organizer",
             children: [
-              { index: true, element: <AvailableCampaignsView /> },
+              // Home de organizador: campañas propias / crear campaña
+              { index: true, element: <CreateCampaignView /> },
               { path: "create-campaign", element: <CreateCampaignView /> },
               { path: "donations", element: <DonationsManagementView /> },
               {
@@ -127,8 +129,11 @@ export const routes = [
           {
             path: "volunteer",
             children: [
-              { index: true, element: <AvailableCampaignsView /> },
-              { path: "my-registrations", element: <MyRegistrationsView /> },
+              { index: true, element: <AvailableCampaignsViewVol /> },
+              {
+                path: "my-registrations",
+                element: <MyRegistrationsView />,
+              },
               { path: "profile", element: <ProfileView /> },
             ],
           },

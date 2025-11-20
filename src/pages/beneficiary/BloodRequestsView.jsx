@@ -1,5 +1,5 @@
 // src/pages/beneficiary/BloodRequestsView.jsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Paper,
@@ -15,14 +15,24 @@ import {
   TableBody,
 } from "@mui/material";
 import {
-  createBloodRequest,
-  getMyBloodRequests,
-} from "../../services/bloodRequestService";
-import { getCenters } from "../../services/centerService";
+  useGetMyBloodRequestsQuery,
+  useCreateBloodRequestMutation,
+} from "../../apis/bloodRequests.api";
+import { useGetCentersQuery } from "../../apis/centers.api";
 
 const BLOOD_TYPES = ["A", "B", "AB", "0"];
 const RH_FACTORS = ["+", "-"];
 const URGENCIES = ["Baja", "Media", "Alta", "Crítica"];
+
+const getErrorMessage = (error, fallback) => {
+  if (!error) return fallback;
+  const data = error.data;
+  let msg =
+    data?.message ||
+    (typeof error.error === "string" && error.error) ||
+    fallback;
+  return Array.isArray(msg) ? msg.join(", ") : msg;
+};
 
 function BloodRequestsView() {
   const [form, setForm] = useState({
@@ -34,47 +44,48 @@ function BloodRequestsView() {
     estimated_date: "",
     notes: "",
   });
-  const [centers, setCenters] = useState([]);
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [centersRes, requestsRes] = await Promise.all([
-        getCenters(),
-        getMyBloodRequests(),
-      ]);
-      setCenters(
-        centersRes.results ||
-          centersRes.items ||
-          centersRes.data ||
-          centersRes ||
-          [],
-      );
-      setRequests(
-        requestsRes.results ||
-          requestsRes.items ||
-          requestsRes.data ||
-          requestsRes ||
-          [],
-      );
-    } catch (error) {
-      const msg =
-        error?.response?.data?.message ||
-        "Error al cargar datos de solicitudes.";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: centersData,
+    isLoading: loadingCenters,
+    error: centersError,
+  } = useGetCentersQuery();
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const {
+    data: requestsData,
+    isLoading: loadingRequests,
+    error: requestsError,
+    refetch: refetchRequests,
+  } = useGetMyBloodRequestsQuery();
+
+  const [createBloodRequest] = useCreateBloodRequestMutation();
+
+  const centers =
+    centersData?.results ||
+    centersData?.items ||
+    centersData?.data ||
+    centersData ||
+    [];
+
+  const requests =
+    requestsData?.results ||
+    requestsData?.items ||
+    requestsData?.data ||
+    requestsData ||
+    [];
+
+  const loading = loadingCenters || loadingRequests;
+
+  const combinedError =
+    centersError || requestsError
+      ? getErrorMessage(
+          centersError || requestsError,
+          "Error al cargar datos de solicitudes.",
+        )
+      : "";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,13 +96,14 @@ function BloodRequestsView() {
     e.preventDefault();
     setErrorMsg("");
     setInfoMsg("");
-
     setSending(true);
+
     try {
       await createBloodRequest({
         ...form,
         units: Number(form.units),
-      });
+      }).unwrap();
+
       setInfoMsg("Solicitud enviada correctamente.");
       setForm({
         blood_type: "",
@@ -102,11 +114,10 @@ function BloodRequestsView() {
         estimated_date: "",
         notes: "",
       });
-      await loadData();
+      await refetchRequests();
     } catch (error) {
-      const msg =
-        error?.response?.data?.message || "No se pudo enviar la solicitud.";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
+      const msg = getErrorMessage(error, "No se pudo enviar la solicitud.");
+      setErrorMsg(msg);
     } finally {
       setSending(false);
     }
@@ -125,6 +136,17 @@ function BloodRequestsView() {
       <Typography variant="h5" mb={2}>
         Solicitudes de sangre
       </Typography>
+
+      {(errorMsg || combinedError) && (
+        <Typography color="error" variant="body2" mb={2}>
+          {errorMsg || combinedError}
+        </Typography>
+      )}
+      {infoMsg && (
+        <Typography color="primary" variant="body2" mb={2}>
+          {infoMsg}
+        </Typography>
+      )}
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" mb={2}>
@@ -230,17 +252,6 @@ function BloodRequestsView() {
             multiline
             minRows={2}
           />
-
-          {errorMsg && (
-            <Typography color="error" variant="body2" mt={1}>
-              {errorMsg}
-            </Typography>
-          )}
-          {infoMsg && (
-            <Typography color="primary" variant="body2" mt={1}>
-              {infoMsg}
-            </Typography>
-          )}
 
           <Button
             type="submit"

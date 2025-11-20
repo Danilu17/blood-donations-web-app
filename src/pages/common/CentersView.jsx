@@ -1,37 +1,33 @@
 // src/pages/common/CentersView.jsx
-import { useEffect, useState } from "react";
 import { Box, Paper, Typography, CircularProgress, Grid } from "@mui/material";
-import { getCenters } from "../../services/centerService";
+import { useGetCentersQuery } from "../../apis/centers.api";
+
+const getErrorMessage = (error, fallback) => {
+  if (!error) return fallback;
+  const data = error.data;
+  let msg =
+    data?.message ||
+    (typeof error.error === "string" && error.error) ||
+    fallback;
+  return Array.isArray(msg) ? msg.join(", ") : msg;
+};
 
 function CentersView() {
-  const [centers, setCenters] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
+  const { data, isLoading, error } = useGetCentersQuery();
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const data = await getCenters();
-        setCenters(data.results || data.items || data.data || data || []);
-      } catch (error) {
-        const msg =
-          error?.response?.data?.message ||
-          "Error al cargar centros de donación.";
-        setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+  const centers = data?.results || data?.items || data?.data || data || [];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box p={3} textAlign="center">
         <CircularProgress />
       </Box>
     );
   }
+
+  const errorMsg = error
+    ? getErrorMessage(error, "Error al cargar centros de donación.")
+    : "";
 
   return (
     <Box p={3}>

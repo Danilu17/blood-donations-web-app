@@ -1,25 +1,16 @@
-// src/hooks/useCampaigns.js
-import { useState, useEffect } from "react";
-import { getCampaigns } from "../services/campaignService";
+import { useEffect } from "react";
+import { useLazyGetCampaignsQuery } from "../apis/campaigns.api";
 
 export default function useCampaigns(filters = {}) {
-  const [campaigns, setCampaigns] = useState([]);
-  const [isLoading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [trigger, { data, isLoading, error }] = useLazyGetCampaignsQuery();
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const data = await getCampaigns(filters);
-        setCampaigns(data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    trigger(filters);
   }, [JSON.stringify(filters)]);
 
-  return { campaigns, isLoading, error };
+  return {
+    campaigns: data?.data || data || [],
+    isLoading,
+    error,
+  };
 }

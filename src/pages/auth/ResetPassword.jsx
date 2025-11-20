@@ -2,10 +2,11 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Box, Paper, Typography, TextField, Button } from "@mui/material";
-import { resetPassword } from "../../services/authService";
+import { useResetPasswordMutation } from "../../apis/auth.api";
 
 export default function ResetPassword() {
   const { token } = useParams();
+  const [resetPassword] = useResetPasswordMutation();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [message, setMessage] = useState("");
@@ -20,13 +21,14 @@ export default function ResetPassword() {
       setError("Las contraseñas no coinciden.");
       return;
     }
-
     try {
-      const res = await resetPassword(token, password);
-      setMessage(res.data.message || "Contraseña actualizada correctamente.");
+      const res = await resetPassword({
+        token,
+        newPassword: password,
+      }).unwrap();
+      setMessage(res.message || "Contraseña actualizada correctamente.");
     } catch (err) {
-      const msg =
-        err?.response?.data?.message || "Error al restablecer la contraseña.";
+      const msg = err?.data?.message || "Error al restablecer la contraseña.";
       setError(msg);
     }
   };
@@ -47,7 +49,6 @@ export default function ResetPassword() {
         <Typography variant="h5" gutterBottom>
           Restablecer contraseña
         </Typography>
-
         {message ? (
           <>
             <Typography gutterBottom>{message}</Typography>
@@ -66,7 +67,6 @@ export default function ResetPassword() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-
             <TextField
               fullWidth
               label="Confirmar contraseña"
@@ -76,13 +76,11 @@ export default function ResetPassword() {
               onChange={(e) => setConfirm(e.target.value)}
               required
             />
-
             {error && (
               <Typography color="error" variant="body2">
                 {error}
               </Typography>
             )}
-
             <Button fullWidth variant="contained" type="submit" sx={{ mt: 2 }}>
               Guardar
             </Button>

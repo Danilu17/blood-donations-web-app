@@ -3,22 +3,27 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setUser } from "../../../stores/user/slice";
-import { login } from "../../../services/authService";
+import { useLoginUserMutation } from "../../../apis/auth.api";
 
-function useLogin() {
+export default function useLogin() {
+  const [loginUser, { isLoading }] = useLoginUserMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const methods = useForm({ defaultValues: { email: "", password: "" } });
+
+  const methods = useForm({
+    defaultValues: { email: "", password: "" },
+  });
 
   const onSubmit = async ({ email, password }) => {
     try {
-      const res = await login(email, password);
-
-      dispatch(setUser(res.user));
-
+      const res = await loginUser({ email, password }).unwrap();
+      // res = { message, data: { access_token, user } }
+      const { user } = res.data;
+      dispatch(setUser(user));
       navigate("/");
     } catch (error) {
-      const msg = error.response?.data?.message || "Error durante el login";
+      const msg =
+        error?.data?.message || "Error al iniciar sesión. Verificá tus datos.";
       alert(msg);
     }
   };
@@ -26,8 +31,6 @@ function useLogin() {
   return {
     methods,
     onSubmit,
-    isSubmitting: methods.formState.isSubmitting,
+    isSubmitting: isLoading,
   };
 }
-
-export default useLogin;

@@ -14,6 +14,11 @@ const ORGANIZER_NAVIGATION = [
     title: "Gestionar Donaciones",
     icon: "",
   },
+  {
+    segment: "organizer/profile",
+    title: "Mi Perfil",
+    icon: "",
+  },
 ];
 
 export default ORGANIZER_NAVIGATION;

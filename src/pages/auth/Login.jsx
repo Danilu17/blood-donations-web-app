@@ -1,48 +1,27 @@
 // src/pages/auth/Login.jsx
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import {
   Box,
-  Button,
-  TextField,
-  Typography,
   Paper,
+  Typography,
+  TextField,
+  Button,
   CircularProgress,
 } from "@mui/material";
-import { login } from "../../services/authService";
-import { setUser } from "../../stores/user/slice";
+import useLogin from "./hooks/useLogin";
 
 function Login() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
+  const { methods, onSubmit, isSubmitting } = useLogin();
+  const { register, handleSubmit } = methods;
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submit = async (data) => {
     setErrorMsg("");
-    setLoading(true);
-
     try {
-      const { user } = await login(form.email, form.password);
-
-      dispatch(setUser(user));
-      console.log(user);
-      navigate("/");
+      await onSubmit(data);
     } catch (error) {
-      const msg =
-        error?.response?.data?.message ||
-        "Error al iniciar sesión. Verificá tus datos.";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
-    } finally {
-      setLoading(false);
+      setErrorMsg(error?.message || "Error al iniciar sesión");
     }
   };
 
@@ -60,47 +39,38 @@ function Login() {
         <Typography variant="h5" mb={2} textAlign="center">
           Iniciar sesión
         </Typography>
-
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(submit)}>
           <TextField
             fullWidth
             label="Correo electrónico"
-            name="email"
             type="email"
-            value={form.email}
-            onChange={handleChange}
             margin="normal"
-            required
+            {...register("email", { required: "El correo es requerido" })}
           />
-
           <TextField
             fullWidth
             label="Contraseña"
-            name="password"
             type="password"
-            value={form.password}
-            onChange={handleChange}
             margin="normal"
-            required
+            {...register("password", {
+              required: "La contraseña es requerida",
+            })}
           />
-
           {errorMsg && (
-            <Typography color="error" variant="body2" mt={1}>
+            <Typography color="error" variant="body2">
               {errorMsg}
             </Typography>
           )}
-
           <Button
             fullWidth
             variant="contained"
             type="submit"
             sx={{ mt: 2 }}
-            disabled={loading}
+            disabled={isSubmitting}
           >
-            {loading ? <CircularProgress size={22} /> : "Entrar"}
+            {isSubmitting ? <CircularProgress size={22} /> : "Entrar"}
           </Button>
         </form>
-
         <Box mt={2} display="flex" justifyContent="space-between">
           <Typography variant="body2">
             ¿No tenés cuenta? <Link to="/register">Registrate</Link>

@@ -1,17 +1,28 @@
+// src/apis/volunteers.api.js
 import { baseApi } from "./base.api";
 
 export const volunteersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Obtener mis inscripciones como voluntario
     getMyVolunteerRegistrations: builder.query({
-      query: (volunteerId) => ({
-        url: `/campaigns/volunteers/user/${volunteerId}`,
+      query: () => ({
+        url: "/volunteers/me",
         method: "GET",
       }),
-      providesTags: ["volunteers"],
+      providesTags: ["Volunteers"],
+    }),
+
+    registerVolunteer: builder.mutation({
+      query: (body) => ({
+        url: "/volunteers",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Volunteers", "Campaigns"],
     }),
   }),
-  overrideExisting: false,
 });
 
-export const { useGetMyVolunteerRegistrationsQuery } = volunteersApi;
+export const {
+  useGetMyVolunteerRegistrationsQuery,
+  useRegisterVolunteerMutation,
+} = volunteersApi;

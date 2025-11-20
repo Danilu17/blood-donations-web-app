@@ -10,6 +10,11 @@ const DONOR_NAVIGATION = [
     icon: "",
   },
   {
+    segment: "donor/health-questionnaire",
+    title: "Cuestionario de Salud",
+    icon: "",
+  },
+  {
     segment: "donor/profile",
     title: "Mi Perfil",
     icon: "",

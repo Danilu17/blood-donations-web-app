@@ -1,5 +1,5 @@
 // src/pages/donor/AvailableCampaignsView.jsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Paper,
@@ -10,57 +10,60 @@ import {
   Chip,
 } from "@mui/material";
 import {
-  getPublicCampaigns,
-  enrollToCampaign,
-} from "../../services/campaignService";
+  useGetPublicCampaignsQuery,
+  useEnrollToCampaignMutation,
+} from "../../apis/campaigns.api";
 
-function AvailableCampaignsView() {
-  const [campaigns, setCampaigns] = useState([]);
-  const [loading, setLoading] = useState(true);
+const getErrorMessage = (error, fallback) => {
+  if (!error) return fallback;
+  const data = error.data;
+  let msg =
+    data?.message ||
+    (typeof error.error === "string" && error.error) ||
+    fallback;
+  return Array.isArray(msg) ? msg.join(", ") : msg;
+};
+
+function AvailableCampaignsViewDon() {
   const [enrollingId, setEnrollingId] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
 
-  const load = async () => {
-    setLoading(true);
-    setErrorMsg("");
-    try {
-      const data = await getPublicCampaigns();
-      // depende de cómo respondas desde el backend
-      setCampaigns(data.results || data.items || data.data || data || []);
-    } catch (error) {
-      const msg = error?.response?.data?.message || "Error al cargar campañas.";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data,
+    isLoading,
+    error: loadError,
+    refetch,
+  } = useGetPublicCampaignsQuery();
 
-  useEffect(() => {
-    load();
-  }, []);
+  const [enrollToCampaign] = useEnrollToCampaignMutation();
+
+  const campaigns = data?.results || data?.items || data?.data || data || [];
+
+  const loadErrorMsg = loadError
+    ? getErrorMessage(loadError, "Error al cargar campañas.")
+    : "";
 
   const handleEnroll = async (campaignId) => {
     setEnrollingId(campaignId);
     setInfoMsg("");
     setErrorMsg("");
+
     try {
-      // acá podrías pedir un horario/turno específico
-      await enrollToCampaign(campaignId, null);
+      await enrollToCampaign({ campaignId, schedule: null }).unwrap();
       setInfoMsg(
         'Inscripción enviada. Revisá tu estado en "Mis inscripciones".',
       );
-      await load();
+      await refetch();
     } catch (error) {
-      const msg =
-        error?.response?.data?.message || "No se pudo inscribir a la campaña.";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
+      const msg = getErrorMessage(error, "No se pudo inscribir a la campaña.");
+      setErrorMsg(msg);
     } finally {
       setEnrollingId(null);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box p={3} textAlign="center">
         <CircularProgress />
@@ -74,9 +77,9 @@ function AvailableCampaignsView() {
         Campañas disponibles
       </Typography>
 
-      {errorMsg && (
+      {(errorMsg || loadErrorMsg) && (
         <Typography color="error" variant="body2" mb={2}>
-          {errorMsg}
+          {errorMsg || loadErrorMsg}
         </Typography>
       )}
       {infoMsg && (
@@ -121,4 +124,4 @@ function AvailableCampaignsView() {
   );
 }
 
-export default AvailableCampaignsView;
+export default AvailableCampaignsViewDon;

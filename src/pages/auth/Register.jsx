@@ -1,21 +1,22 @@
+// src/pages/auth/Register.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Box,
-  Button,
+  Paper,
   TextField,
   Typography,
-  Paper,
+  Button,
   MenuItem,
-  CircularProgress,
   FormControlLabel,
   Checkbox,
+  CircularProgress,
 } from "@mui/material";
-import { register as registerUser } from "../../services/authService";
+import { useRegisterUserMutation } from "../../apis/auth.api";
 
-export default function Register() {
+function Register() {
   const navigate = useNavigate();
-
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -29,8 +30,6 @@ export default function Register() {
     confirmPassword: "",
     accepts_terms: false,
   });
-
-  const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
 
@@ -47,21 +46,17 @@ export default function Register() {
     setErrorMsg("");
     setInfoMsg("");
 
-    // Validaciones del frontend
     if (!form.accepts_terms) {
       return setErrorMsg(
         "Debés aceptar el consentimiento informado para registrarte.",
       );
     }
-
     if (form.password !== form.confirmPassword) {
       return setErrorMsg("Las contraseñas no coinciden.");
     }
 
-    setLoading(true);
-
     try {
-      const res = await registerUser({
+      const payload = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         dni: form.dni.trim(),
@@ -72,18 +67,15 @@ export default function Register() {
         address: form.address.trim(),
         password: form.password,
         accepts_terms: form.accepts_terms,
-      });
-
-      setInfoMsg(res.data.message || "Registro exitoso.");
-
-      setTimeout(() => navigate("/login"), 1500);
+      };
+      const res = await registerUser(payload).unwrap();
+      setInfoMsg(res.message);
+      // Redirige al login tras 2 segundos
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       const msg =
-        error?.response?.data?.message ||
-        "Error al registrarse. Verificá los datos.";
+        error?.data?.message || "Error al registrarse. Verifica los datos.";
       setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -102,7 +94,6 @@ export default function Register() {
         <Typography variant="h5" mb={2} textAlign="center">
           Registrarse
         </Typography>
-
         <form onSubmit={handleSubmit}>
           <Box display="flex" gap={2}>
             <TextField
@@ -122,7 +113,6 @@ export default function Register() {
               required
             />
           </Box>
-
           <TextField
             fullWidth
             label="DNI"
@@ -132,7 +122,6 @@ export default function Register() {
             margin="normal"
             required
           />
-
           <Box display="flex" gap={2}>
             <TextField
               fullWidth
@@ -144,7 +133,6 @@ export default function Register() {
               InputLabelProps={{ shrink: true }}
               required
             />
-
             <TextField
               select
               fullWidth
@@ -159,7 +147,6 @@ export default function Register() {
               <MenuItem value="other">Otro / No binario</MenuItem>
             </TextField>
           </Box>
-
           <TextField
             fullWidth
             label="Correo electrónico"
@@ -170,7 +157,6 @@ export default function Register() {
             margin="normal"
             required
           />
-
           <TextField
             fullWidth
             label="Teléfono"
@@ -180,7 +166,6 @@ export default function Register() {
             margin="normal"
             required
           />
-
           <TextField
             fullWidth
             label="Dirección"
@@ -190,7 +175,6 @@ export default function Register() {
             margin="normal"
             required
           />
-
           <Box display="flex" gap={2}>
             <TextField
               fullWidth
@@ -213,7 +197,6 @@ export default function Register() {
               required
             />
           </Box>
-
           <Box
             sx={{
               backgroundColor: "#fff7e6",
@@ -233,7 +216,6 @@ export default function Register() {
               campañas relevantes.
             </p>
           </Box>
-
           <FormControlLabel
             control={
               <Checkbox
@@ -244,30 +226,26 @@ export default function Register() {
             }
             label="Acepto el consentimiento informado"
           />
-
           {errorMsg && (
             <Typography color="error" variant="body2" mt={1}>
               {errorMsg}
             </Typography>
           )}
-
           {infoMsg && (
             <Typography color="primary" variant="body2" mt={1}>
               {infoMsg}
             </Typography>
           )}
-
           <Button
             fullWidth
             type="submit"
             variant="contained"
             sx={{ mt: 2 }}
-            disabled={loading}
+            disabled={isLoading}
           >
-            {loading ? <CircularProgress size={22} /> : "Crear cuenta"}
+            {isLoading ? <CircularProgress size={22} /> : "Crear cuenta"}
           </Button>
         </form>
-
         <Box mt={2}>
           <Typography variant="body2">
             ¿Ya tenés cuenta? <Link to="/login">Iniciar sesión</Link>
@@ -277,3 +255,5 @@ export default function Register() {
     </Box>
   );
 }
+
+export default Register;

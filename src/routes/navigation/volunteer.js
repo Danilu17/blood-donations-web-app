@@ -9,6 +9,11 @@ const VOLUNTEER_NAVIGATION = [
     title: "Mis Inscripciones",
     icon: "",
   },
+  {
+    segment: "volunteer/profile",
+    title: "Mi Perfil",
+    icon: "",
+  },
 ];
 
 export default VOLUNTEER_NAVIGATION;

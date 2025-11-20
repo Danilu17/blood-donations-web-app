@@ -1,23 +1,24 @@
+// src/stores/user/slice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   id: "",
   role: "",
-  name: "",
+  first_name: "",
+  last_name: "",
   email: "",
-  bloodType: "",
-  eligibilityStatus: "",
-  points: 0,
-  level: "",
+  blood_type: "",
+  donation_count: 0,
 };
 
-export const userSlice = createSlice({
+const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
     setUser: (state, action) => {
       return {
         ...state,
+        ...action.payload,
         role: action.payload.role?.toLowerCase() ?? "",
       };
     },
