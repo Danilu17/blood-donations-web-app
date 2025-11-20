@@ -1,33 +1,10 @@
-// src/apis/donations.api.js
+// src/api/donations.api.js
 import { baseApi } from "./base.api";
 
 export const donationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMyDonations: builder.query({
-      query: ({ page = 1, limit = 5, ...filters } = {}) => ({
-        url: "/donations/",
-        method: "GET",
-        params: {
-          page,
-          limit,
-          date_from: filters.dateFrom,
-          date_to: filters.dateTo,
-          campaign: filters.campaign,
-          center: filters.center,
-          status: filters.status,
-        },
-      }),
-    }),
-
-    getDonationsByCampaign: builder.query({
-      query: (campaignId) => ({
-        url: `/donations/campaign/${campaignId}`,
-        method: "GET",
-      }),
-      providesTags: ["Donations"],
-    }),
-
-    scheduleDonation: builder.mutation({
+    // Crear donación (organizador registra donación)
+    createDonation: builder.mutation({
       query: (body) => ({
         url: "/donations",
         method: "POST",
@@ -36,20 +13,26 @@ export const donationsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Donations"],
     }),
 
-    completeDonation: builder.mutation({
-      query: ({ id, units }) => ({
-        url: `/donations/${id}/complete`,
-        method: "PATCH",
-        body: { units },
+    // Opcional: listar donaciones de una campaña (si agregás filtro en backend)
+    getDonationsByCampaign: builder.query({
+      query: (campaignId) =>
+        `/donations?campaignId=${encodeURIComponent(campaignId)}`,
+      providesTags: ["Donations"],
+    }),
+
+    // Generar certificado para una donación ya creada
+    generateCertificate: builder.mutation({
+      query: (donationId) => ({
+        url: `/donations/${donationId}/certificate`,
+        method: "GET",
       }),
-      invalidatesTags: ["Donations"],
+      invalidatesTags: ["Donations", "Certificates"],
     }),
   }),
 });
 
 export const {
-  useGetMyDonationsQuery,
+  useCreateDonationMutation,
   useGetDonationsByCampaignQuery,
-  useScheduleDonationMutation,
-  useCompleteDonationMutation,
+  useGenerateCertificateMutation,
 } = donationsApi;

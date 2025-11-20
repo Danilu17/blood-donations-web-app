@@ -3,28 +3,24 @@ import { baseApi } from "./base.api";
 
 export const campaignsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getPublicCampaigns: builder.query({
-      query: () => ({
-        url: "/campaigns/public",
-        method: "GET",
-      }),
-      providesTags: ["Campaigns"],
-    }),
-
     getCampaigns: builder.query({
-      query: () => ({
-        url: "/campaigns",
-        method: "GET",
-      }),
+      query: (params = {}) => {
+        const query = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            query.append(key, value);
+          }
+        });
+
+        return `/campaigns${query.toString() ? `?${query.toString()}` : ""}`;
+      },
       providesTags: ["Campaigns"],
     }),
 
     getCampaignById: builder.query({
-      query: (id) => ({
-        url: `/campaigns/${id}`,
-        method: "GET",
-      }),
-      providesTags: ["Campaigns"],
+      query: (id) => `/campaigns/${id}`,
+      providesTags: (result, error, id) => [{ type: "Campaigns", id }],
     }),
 
     createCampaign: builder.mutation({
@@ -36,24 +32,41 @@ export const campaignsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Campaigns"],
     }),
 
-    enrollToCampaign: builder.mutation({
-      query: ({ campaignId, schedule }) => ({
-        url: `/campaigns/${campaignId}/enroll`,
-        method: "POST",
-        body: { schedule },
+    updateCampaign: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/campaigns/${id}`,
+        method: "PATCH",
+        body,
       }),
-      invalidatesTags: ["Campaigns", "Enrollments"],
+      invalidatesTags: (result, error, { id }) => [
+        "Campaigns",
+        { type: "Campaigns", id },
+      ],
+    }),
+
+    completeCampaign: builder.mutation({
+      query: (id) => ({
+        url: `/campaigns/${id}/complete`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Campaigns"],
+    }),
+
+    cancelCampaign: builder.mutation({
+      query: (id) => ({
+        url: `/campaigns/${id}/cancel`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Campaigns"],
     }),
   }),
 });
 
 export const {
-  useGetPublicCampaignsQuery,
   useGetCampaignsQuery,
   useGetCampaignByIdQuery,
   useCreateCampaignMutation,
-  useEnrollToCampaignMutation,
+  useUpdateCampaignMutation,
+  useCompleteCampaignMutation,
+  useCancelCampaignMutation,
 } = campaignsApi;
-
-// 🔁 Alias para compatibilidad con código viejo
-export { useGetPublicCampaignsQuery as useGetActiveCampaignsQuery };

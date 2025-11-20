@@ -22,12 +22,23 @@ import ProfileView from "../pages/profile/ProfileView.jsx";
 
 // Organizer pages
 import CreateCampaignView from "../pages/organizer/CreateCampaignView.jsx";
-import DonationsManagementView from "../pages/organizer/DonationsManagementView.jsx";
-import RegistrationsView from "../pages/organizer/RegistrationsView.jsx";
+import MyCampaignsView from "../pages/organizer/MyCampaignsView.jsx";
+import CampaignEnrollmentsView from "../pages/organizer/CampaignEnrollmentsView.jsx";
+import CampaignDonationsView from "../pages/organizer/CampaignDonationsView.jsx";
+import BloodRequestsView from "../pages/organizer/BloodRequestsView.jsx";
 
 // Volunteer pages
 import AvailableCampaignsViewVol from "../pages/volunteer/AvailableCampaignsViewVol.jsx";
 import MyRegistrationsView from "../pages/volunteer/MyRegistrationsView.jsx";
+
+// Admin pages
+import UsersManagementView from "../pages/admin/UsersManagementView.jsx";
+import RoleChangeRequestsView from "../pages/admin/RoleChangeRequestsView.jsx";
+import CentersManagementView from "../pages/admin/CentersManagementView.jsx";
+
+// Beneficiary pages
+import CreateBloodRequestView from "../pages/beneficiary/CreateBloodRequestView.jsx";
+import MyBloodRequestsView from "../pages/beneficiary/MyBloodRequestsView.jsx";
 
 /**
  * Layout protegido:
@@ -46,8 +57,8 @@ const ProtectedLayout = () => {
 
 /**
  * Redirección según rol:
- * role lo tenemos SIEMPRE en minúsculas por el slice:
- *   "donor" | "organizer" | "volunteer"
+ * role en minúsculas:
+ * "donor" | "organizer" | "volunteer" | "beneficiary" | "admin"
  */
 const DashboardRedirect = () => {
   const userRole = useSelector((state) => state.user.role);
@@ -63,6 +74,10 @@ const DashboardRedirect = () => {
       return <Navigate to="/organizer" replace />;
     case "volunteer":
       return <Navigate to="/volunteer" replace />;
+    case "beneficiary":
+      return <Navigate to="/beneficiary" replace />;
+    case "admin":
+      return <Navigate to="/admin" replace />;
     default:
       return <Navigate to="/login" replace />;
   }
@@ -111,17 +126,25 @@ export const routes = [
           {
             path: "organizer",
             children: [
-              { index: true, element: <CreateCampaignView /> },
-              { path: "create-campaign", element: <CreateCampaignView /> },
-              { path: "donations", element: <DonationsManagementView /> },
+              { index: true, element: <MyCampaignsView /> },
+              { path: "", element: <MyCampaignsView /> },
+              { path: "campaigns", element: <MyCampaignsView /> },
+
+              { path: "campaigns/new", element: <CreateCampaignView /> },
+              { path: "campaigns/:id/edit", element: <CreateCampaignView /> },
+
               {
-                path: "donations/:campaignId",
-                element: <DonationsManagementView />,
+                path: "campaigns/:id/enrollments",
+                element: <CampaignEnrollmentsView />,
               },
+
               {
-                path: "registrations/:campaignId",
-                element: <RegistrationsView />,
+                path: "campaigns/:id/donations",
+                element: <CampaignDonationsView />,
               },
+
+              { path: "blood-requests", element: <BloodRequestsView /> },
+
               { path: "profile", element: <ProfileView /> },
             ],
           },
@@ -132,6 +155,33 @@ export const routes = [
             children: [
               { index: true, element: <AvailableCampaignsViewVol /> },
               { path: "my-registrations", element: <MyRegistrationsView /> },
+              { path: "profile", element: <ProfileView /> },
+            ],
+          },
+
+          // BENEFICIARY ROUTES
+          {
+            path: "beneficiary",
+            children: [
+              { index: true, element: <MyBloodRequestsView /> },
+              { path: "requests", element: <MyBloodRequestsView /> },
+              { path: "blood-requests", element: <MyBloodRequestsView /> },
+              {
+                path: "blood-requests/new",
+                element: <CreateBloodRequestView />,
+              },
+              { path: "profile", element: <ProfileView /> },
+            ],
+          },
+
+          // ADMIN ROUTES
+          {
+            path: "admin",
+            children: [
+              { index: true, element: <UsersManagementView /> },
+              { path: "users", element: <UsersManagementView /> },
+              { path: "role-requests", element: <RoleChangeRequestsView /> },
+              { path: "centers", element: <CentersManagementView /> },
               { path: "profile", element: <ProfileView /> },
             ],
           },

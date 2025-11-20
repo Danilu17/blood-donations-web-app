@@ -4,27 +4,49 @@ import { baseApi } from "./base.api";
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getUsers: builder.query({
-      query: (filters = {}) => {
-        const params = new URLSearchParams();
-        Object.entries(filters).forEach(([k, v]) => {
-          if (v !== "" && v !== null && v !== undefined) params.append(k, v);
+      query: (params = {}) => {
+        const query = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            query.append(key, value);
+          }
         });
-        return {
-          url: `/users?${params.toString()}`,
-          method: "GET",
-        };
+
+        return `/users${query.toString() ? `?${query.toString()}` : ""}`;
       },
       providesTags: ["Users"],
     }),
 
     getUserById: builder.query({
+      query: (id) => `/users/${id}`,
+      providesTags: (result, error, id) => [{ type: "Users", id }],
+    }),
+
+    updateUser: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/users/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        "Users",
+        { type: "Users", id },
+      ],
+    }),
+
+    deleteUser: builder.mutation({
       query: (id) => ({
         url: `/users/${id}`,
-        method: "GET",
+        method: "DELETE",
       }),
-      providesTags: ["Users"],
+      invalidatesTags: ["Users"],
     }),
   }),
 });
 
-export const { useGetUsersQuery, useGetUserByIdQuery } = usersApi;
+export const {
+  useGetUsersQuery,
+  useGetUserByIdQuery,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} = usersApi;

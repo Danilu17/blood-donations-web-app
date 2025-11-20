@@ -1,30 +1,43 @@
-// src/apis/role-change.api.js
+// src/apis/roleChange.api.js
 import { baseApi } from "./base.api";
 
 export const roleChangeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    /**
-     * Solicitar cambio de rol: el cuerpo debe contener
-     * `{ requested_role: 'beneficiary' | 'organizer', justification?: string }`.
-     * Se invalida la etiqueta `RoleChangeRequests` para recargar la lista tras enviar.
-     */
-    requestRoleChange: builder.mutation({
-      query: ({ requested_role, justification }) => ({
-        url: "/role-change/request",
-        method: "POST",
-        body: { requested_role, justification },
-      }),
-      invalidatesTags: ["RoleChangeRequests"],
+    // ADMIN: listar solicitudes (puede filtrar por status)
+    getRoleChangeRequests: builder.query({
+      query: (params = {}) => {
+        const query = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            query.append(key, value);
+          }
+        });
+
+        return `/role-change${query.toString() ? `?${query.toString()}` : ""}`;
+      },
+      providesTags: ["RoleChange"],
     }),
-    /**
-     * Obtener mis solicitudes de cambio de rol.
-     */
+
+    // Usuario: ver sus propias solicitudes (por si lo usás en donor)
     getMyRoleChangeRequests: builder.query({
-      query: () => ({ url: "/role-change/my-requests", method: "GET" }),
-      providesTags: ["RoleChangeRequests"],
+      query: () => `/role-change/my-requests`,
+      providesTags: ["RoleChange"],
+    }),
+
+    // ADMIN: revisar solicitud
+    reviewRoleChangeRequest: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/role-change/${id}/review`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["RoleChange", "Users"],
     }),
   }),
 });
 
-export const { useRequestRoleChangeMutation, useGetMyRoleChangeRequestsQuery } =
-  roleChangeApi;
+export const {
+  useGetRoleChangeRequestsQuery,
+  useGetMyRoleChangeRequestsQuery,
+  useReviewRoleChangeRequestMutation,
+} = roleChangeApi;

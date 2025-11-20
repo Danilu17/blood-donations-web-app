@@ -1,29 +1,38 @@
 // src/pages/organizer/CreateCampaignView.jsx
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { Button, Typography, Paper, Box, Grid } from "@mui/material";
+
 import { useCreateCampaignMutation } from "../../apis/campaigns.api";
-import CampaignForm from "./CampaignForm";
+import FormTextField from "../../components/forms/FormTextField";
+// Si después querés selects específicos, podés usar también:
+// import FormSelectField from "../../components/form/FormSelectField.jsx";
 
 function CreateCampaignView() {
   const navigate = useNavigate();
+  const [createCampaign, { isLoading }] = useCreateCampaignMutation();
 
-  const form = useForm({
+  // Hook del formulario (acá podés agregar validaciones más adelante)
+  const methods = useForm({
     defaultValues: {
       title: "",
       description: "",
       start_date: "",
       end_date: "",
       location: "",
-      max_donors: 0,
+      max_donors: "",
     },
   });
 
-  const [createCampaign, { isLoading }] = useCreateCampaignMutation();
+  const { handleSubmit } = methods;
 
-  const handleCreateCampaign = async (values) => {
+  // Envío final del formulario
+  const onSubmit = async (data) => {
     try {
-      await createCampaign(values).unwrap();
-      // después de crear, lo mandás a donde quieras:
+      // Ajustá los nombres de campos si tu backend usa otros DTOs
+      await createCampaign(data).unwrap();
+
+      // Después de crear la campaña, redirigimos al organizador
       navigate("/organizer/donations", { replace: true });
     } catch (error) {
       console.error(error);
@@ -31,12 +40,123 @@ function CreateCampaignView() {
     }
   };
 
+  const handleBack = () => {
+    navigate("/organizer", { replace: true });
+  };
+
   return (
-    <CampaignForm
-      form={form}
-      onSubmit={handleCreateCampaign}
-      isSubmitting={isLoading}
-    />
+    <FormProvider {...methods}>
+      <Paper
+        sx={{
+          maxWidth: 1000,
+          mx: "auto",
+          mt: 4,
+          p: 3,
+          bgcolor: "white",
+          borderRadius: 2,
+          border: "1px solid #e5e7eb",
+        }}
+      >
+        <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
+          Crear campaña de donación
+        </Typography>
+
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormTextField
+                name="title"
+                label="Título de la campaña"
+                placeholder="Ej: Colecta en Hospital Central"
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormTextField
+                name="description"
+                label="Descripción"
+                placeholder="Breve descripción de la campaña..."
+                multiline
+                rows={3}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormTextField
+                name="start_date"
+                label="Fecha de inicio"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormTextField
+                name="end_date"
+                label="Fecha de fin"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormTextField
+                name="location"
+                label="Lugar / Centro de donación"
+                placeholder="Ej: Hospital Italiano, Av. X 1234"
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <FormTextField
+                name="max_donors"
+                label="Cupo máximo de donantes"
+                type="number"
+                placeholder="Ej: 50"
+                fullWidth
+              />
+            </Grid>
+          </Grid>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mt: 3,
+            }}
+          >
+            <Button
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                px: 4,
+                textTransform: "none",
+              }}
+              onClick={handleBack}
+            >
+              Atrás
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isLoading}
+              sx={{
+                borderRadius: 2,
+                px: 4,
+                textTransform: "none",
+              }}
+            >
+              {isLoading ? "Creando..." : "Crear campaña"}
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+    </FormProvider>
   );
 }
 
