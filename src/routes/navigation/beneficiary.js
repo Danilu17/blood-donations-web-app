@@ -1,20 +1,7 @@
-// src/routes/navigation/beneficiary.js
 const BENEFICIARY_NAVIGATION = [
-  {
-    segment: "beneficiary",
-    title: "Mis solicitudes de sangre",
-    icon: "",
-  },
-  {
-    segment: "beneficiary/blood-requests/new",
-    title: "Nueva solicitud",
-    icon: "",
-  },
-  {
-    segment: "beneficiary/profile",
-    title: "Mi perfil",
-    icon: "",
-  },
+  { label: "Mis solicitudes", path: "/beneficiary" },
+  { label: "Nueva solicitud", path: "/beneficiary/blood-requests/new" },
+  { label: "Mi perfil", path: "/beneficiary/profile" },
 ];
 
 export default BENEFICIARY_NAVIGATION;

@@ -1,9 +1,7 @@
-// src/api/donations.api.js
 import { baseApi } from "./base.api";
 
 export const donationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Crear donación (organizador registra donación)
     createDonation: builder.mutation({
       query: (body) => ({
         url: "/donations",
@@ -13,16 +11,19 @@ export const donationsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Donations"],
     }),
 
-    // Listar todas las donaciones (luego filtramos por campaña en el hook)
     getDonations: builder.query({
-      query: () => ({
-        url: "/donations",
-        method: "GET",
-      }),
+      query: (params = {}) => {
+        const query = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            query.append(key, value);
+          }
+        });
+        return `/donations${query.toString() ? `?${query.toString()}` : ""}`;
+      },
       providesTags: ["Donations"],
     }),
 
-    // Marcar donación como completada
     completeDonation: builder.mutation({
       query: ({ id, quantity_ml }) => ({
         url: `/donations/${id}/complete`,
@@ -32,7 +33,6 @@ export const donationsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Donations"],
     }),
 
-    // Generar certificado para una donación
     generateDonationCertificate: builder.mutation({
       query: (id) => ({
         url: `/donations/${id}/certificate`,
@@ -47,5 +47,5 @@ export const {
   useCreateDonationMutation,
   useCompleteDonationMutation,
   useGetDonationsQuery,
-  useGenerateCertificateMutation,
+  useGenerateDonationCertificateMutation,
 } = donationsApi;

@@ -1,25 +1,8 @@
-// src/routes/navigation/admin.js
 const ADMIN_NAVIGATION = [
-  {
-    segment: "admin",
-    title: "Usuarios",
-    icon: "",
-  },
-  {
-    segment: "admin/role-requests",
-    title: "Solicitudes de cambio de rol",
-    icon: "",
-  },
-  {
-    segment: "admin/centers",
-    title: "Centros de donación",
-    icon: "",
-  },
-  {
-    segment: "admin/profile",
-    title: "Mi perfil",
-    icon: "",
-  },
+  { label: "Usuarios", path: "/admin" },
+  { label: "Solicitudes de cambio de rol", path: "/admin/role-requests" },
+  { label: "Centros de donación", path: "/admin/centers" },
+  { label: "Mi perfil", path: "/admin/profile" },
 ];
 
 export default ADMIN_NAVIGATION;

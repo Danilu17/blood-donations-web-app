@@ -1,9 +1,7 @@
-// src/apis/enrollments.api.js
 import { baseApi } from "./base.api";
 
 export const enrollmentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Donante: crear inscripción
     createEnrollment: builder.mutation({
       query: (body) => ({
         url: "/enrollments",
@@ -13,23 +11,31 @@ export const enrollmentsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Enrollments", "Campaigns"],
     }),
 
-    // Donante: mis inscripciones
     getMyEnrollments: builder.query({
-      query: (donorId) =>
-        `/enrollments?donorId=${encodeURIComponent(donorId)}&limit=50&page=0`,
+      query: (donorId) => {
+        if (!donorId) return { url: "/enrollments" };
+        const params = new URLSearchParams({
+          limit: "50",
+          page: "0",
+        });
+        return `/enrollments?${params.toString()}`;
+      },
       providesTags: ["Enrollments"],
     }),
 
-    // Organizador: inscripciones de una campaña
     getCampaignEnrollments: builder.query({
-      query: (campaignId) =>
-        `/enrollments?campaignId=${encodeURIComponent(
-          campaignId,
-        )}&limit=100&page=0`,
+      query: (campaignId) => {
+        if (!campaignId) return "/enrollments";
+        const params = new URLSearchParams({
+          campaignId: campaignId,
+          limit: "100",
+          page: "0",
+        });
+        return `/enrollments?${params.toString()}`;
+      },
       providesTags: ["Enrollments"],
     }),
 
-    // Donante: cancelar inscripción
     cancelEnrollment: builder.mutation({
       query: (id) => ({
         url: `/enrollments/${id}/cancel`,
@@ -38,7 +44,6 @@ export const enrollmentsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Enrollments", "Campaigns"],
     }),
 
-    // Organizador: confirmar inscripción
     confirmEnrollment: builder.mutation({
       query: (id) => ({
         url: `/enrollments/${id}/confirm`,

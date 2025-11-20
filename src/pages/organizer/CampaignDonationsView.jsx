@@ -22,7 +22,7 @@ import { useGetCampaignEnrollmentsQuery } from "../../apis/enrollments.api";
 import { useGetCampaignByIdQuery } from "../../apis/campaigns.api";
 import {
   useCreateDonationMutation,
-  useGenerateCertificateMutation,
+  useGenerateDonationCertificateMutation,
 } from "../../apis/donations.api";
 import { useState } from "react";
 
@@ -43,7 +43,7 @@ const CampaignDonationsView = () => {
 
   const [createDonation, { isLoading: creating }] = useCreateDonationMutation();
   const [generateCertificate, { isLoading: generating }] =
-    useGenerateCertificateMutation();
+    useGenerateDonationCertificateMutation();
 
   const [quantityByEnrollment, setQuantityByEnrollment] = useState({});
 

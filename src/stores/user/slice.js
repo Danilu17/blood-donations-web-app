@@ -1,4 +1,3 @@
-// src/stores/user/slice.js
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -9,6 +8,7 @@ const initialState = {
   email: "",
   blood_type: "",
   donation_count: 0,
+  is_active: true,
 };
 
 const userSlice = createSlice({

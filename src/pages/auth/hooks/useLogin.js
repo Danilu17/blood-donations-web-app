@@ -1,4 +1,3 @@
-// src/pages/auth/hooks/useLogin.js
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -17,14 +16,16 @@ export default function useLogin() {
   const onSubmit = async ({ email, password }) => {
     try {
       const res = await loginUser({ email, password }).unwrap();
-      // Se asume: res = { message, data: { access_token, user } }
-      const { user } = res.data;
 
-      // Guardamos el usuario en Redux.
-      // El slice ya se encarga de poner role en minúsculas.
-      dispatch(setUser(user));
+      // Guardar token
+      if (res.data?.access_token) {
+        localStorage.setItem("access_token", res.data.access_token);
+      }
 
-      // Luego del login vamos a "/"
+      // Preparar datos del usuario
+      const userData = res.data?.user || res.user;
+
+      dispatch(setUser(userData));
       navigate("/", { replace: true });
     } catch (error) {
       const msg =
