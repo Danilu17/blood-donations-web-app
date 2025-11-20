@@ -1,6 +1,7 @@
 // src/pages/auth/Login.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import {
   Box,
   Button,
@@ -10,9 +11,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { login } from "../../services/authService";
+import { setUser } from "../../stores/user/slice";
 
 function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -25,9 +29,13 @@ function Login() {
     e.preventDefault();
     setErrorMsg("");
     setLoading(true);
+
     try {
-      await login(form.email, form.password);
-      navigate("/"); // redirigir al dashboard principal
+      const { user } = await login(form.email, form.password);
+
+      dispatch(setUser(user));
+      console.log(user);
+      navigate("/");
     } catch (error) {
       const msg =
         error?.response?.data?.message ||
@@ -48,14 +56,7 @@ function Login() {
         bgcolor: "#f3f4f6",
       }}
     >
-      <Paper
-        sx={{
-          width: 400,
-          p: 4,
-          borderRadius: 2,
-          boxShadow: 3,
-        }}
-      >
+      <Paper sx={{ width: 400, p: 4, borderRadius: 2, boxShadow: 3 }}>
         <Typography variant="h5" mb={2} textAlign="center">
           Iniciar sesión
         </Typography>
@@ -71,6 +72,7 @@ function Login() {
             margin="normal"
             required
           />
+
           <TextField
             fullWidth
             label="Contraseña"
@@ -90,8 +92,8 @@ function Login() {
 
           <Button
             fullWidth
-            type="submit"
             variant="contained"
+            type="submit"
             sx={{ mt: 2 }}
             disabled={loading}
           >

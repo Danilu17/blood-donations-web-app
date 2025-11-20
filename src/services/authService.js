@@ -2,24 +2,21 @@
 import api from "./api";
 
 function saveSession(access_token, user) {
-  if (access_token) localStorage.setItem("access_token", access_token);
-  if (user) localStorage.setItem("user", JSON.stringify(user));
+  localStorage.setItem("access_token", access_token);
+  localStorage.setItem("user", JSON.stringify(user));
 }
 
 export async function login(email, password) {
   const res = await api.post("/auth/login", { email, password });
-  const { access_token, user } = res;
+
+  const { access_token, user } = res.data.data; // ✔️ Correcto
+
   saveSession(access_token, user);
-  return user;
+  return user; // ✔️ devuelve solo el user
 }
 
 export async function register(payload) {
-  // payload debe incluir: nombre, apellido, dni, fecha_nacimiento, sexo, correo, teléfono, dirección, contraseña
   return api.post("/auth/register", payload);
-}
-
-export async function verifyEmail(token) {
-  return api.get(`/auth/verify-email`, { params: { token } });
 }
 
 export async function forgotPassword(email) {

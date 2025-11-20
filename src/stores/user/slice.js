@@ -18,7 +18,7 @@ export const userSlice = createSlice({
     setUser: (state, action) => {
       return {
         ...state,
-        ...action.payload, // mergea todo lo que venga del mock o del backend
+        role: action.payload.role?.toLowerCase() ?? "",
       };
     },
     clearUser: () => initialState,

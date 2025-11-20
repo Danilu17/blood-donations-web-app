@@ -12,9 +12,11 @@ function useLogin() {
 
   const onSubmit = async ({ email, password }) => {
     try {
-      const user = await login(email, password);
-      dispatch(setUser(user)); // Guarda en Redux
-      navigate("/"); // Redirige al dashboard
+      const res = await login(email, password);
+
+      dispatch(setUser(res.user));
+
+      navigate("/");
     } catch (error) {
       const msg = error.response?.data?.message || "Error durante el login";
       alert(msg);

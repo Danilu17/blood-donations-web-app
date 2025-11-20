@@ -1,13 +1,31 @@
 // src/pages/auth/ForgotPassword.jsx
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Box, Paper, Typography, Button, TextField } from "@mui/material";
+import { forgotPassword } from "../../services/authService";
+import { useNavigate } from "react-router-dom";
 
 export default function ForgotPassword() {
   const { register, handleSubmit } = useForm();
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const onSubmit = (data) => {
-    console.log("Enviar email de recuperación:", data);
-    alert("Si el correo existe, recibirás instrucciones.");
+  const onSubmit = async ({ email }) => {
+    setError("");
+
+    try {
+      const res = await forgotPassword(email);
+
+      const token = res.data.token;
+
+      if (token && token.length > 0) {
+        navigate(`/reset-password/${token}`);
+      } else {
+        navigate(`/reset-password/invalid`);
+      }
+    } catch {
+      setError("Error al solicitar restablecimiento de contraseña.");
+    }
   };
 
   return (
@@ -17,12 +35,18 @@ export default function ForgotPassword() {
           Recuperar contraseña
         </Typography>
 
+        {error && (
+          <Typography color="error" variant="body2" gutterBottom>
+            {error}
+          </Typography>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             fullWidth
             label="Correo electrónico"
             margin="normal"
-            {...register("email")}
+            {...register("email", { required: true })}
           />
 
           <Button
@@ -32,7 +56,7 @@ export default function ForgotPassword() {
             type="submit"
             sx={{ mt: 2 }}
           >
-            Enviar enlace
+            Continuar
           </Button>
         </form>
       </Paper>

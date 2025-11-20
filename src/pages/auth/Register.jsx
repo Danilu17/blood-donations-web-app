@@ -1,4 +1,3 @@
-// src/pages/auth/Register.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -14,8 +13,9 @@ import {
 } from "@mui/material";
 import { register as registerUser } from "../../services/authService";
 
-function Register() {
+export default function Register() {
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -47,6 +47,7 @@ function Register() {
     setErrorMsg("");
     setInfoMsg("");
 
+    // Validaciones del frontend
     if (!form.accepts_terms) {
       return setErrorMsg(
         "Debés aceptar el consentimiento informado para registrarte.",
@@ -58,30 +59,28 @@ function Register() {
     }
 
     setLoading(true);
+
     try {
-      await registerUser({
-        first_name: form.first_name,
-        last_name: form.last_name,
-        dni: form.dni,
+      const res = await registerUser({
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        dni: form.dni.trim(),
         birth_date: form.birth_date,
         gender: form.gender,
-        email: form.email,
-        phone: form.phone,
-        address: form.address,
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        address: form.address.trim(),
         password: form.password,
         accepts_terms: form.accepts_terms,
       });
 
-      setInfoMsg(
-        "Registro exitoso. Revisá tu correo para verificar la cuenta antes de iniciar sesión.",
-      );
+      setInfoMsg(res.data.message || "Registro exitoso.");
 
-      setTimeout(() => navigate("/login"), 2500);
+      setTimeout(() => navigate("/login"), 1500);
     } catch (error) {
       const msg =
         error?.response?.data?.message ||
         "Error al registrarse. Verificá los datos.";
-
       setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
     } finally {
       setLoading(false);
@@ -134,7 +133,7 @@ function Register() {
             required
           />
 
-          <Box display="flex" gap={2} mb={0}>
+          <Box display="flex" gap={2}>
             <TextField
               fullWidth
               type="date"
@@ -215,7 +214,6 @@ function Register() {
             />
           </Box>
 
-          {/* Consentimiento informado */}
           <Box
             sx={{
               backgroundColor: "#fff7e6",
@@ -279,5 +277,3 @@ function Register() {
     </Box>
   );
 }
-
-export default Register;
