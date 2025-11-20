@@ -1,62 +1,90 @@
 // src/hooks/useDonationsManagement.js
-import { useMemo, useCallback } from "react";
+// Hook para gestionar donaciones en el prototipo. Se apoya en el
+// backend simulado (ver src/mocks/mockBackend.js) para obtener y
+// actualizar datos sin realizar peticiones HTTP.
+
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
-  useGetDonationsQuery,
-  useCompleteDonationMutation,
-  useGenerateDonationCertificateMutation,
-} from "../apis/donations.api";
+  getDonations,
+  completeDonation,
+  cancelDonation,
+  generateCertificate,
+} from "../mocks/mockBackend";
 
+/**
+ * Devuelve las donaciones asociadas a una campaña (o todas si no se
+ * especifica ID) junto con funciones para actualizar su estado. En
+ * lugar de interactuar con un API remoto, este hook manipula datos
+ * almacenados en memoria para permitir un funcionamiento autónomo.
+ *
+ * @param {string|null} campaignId ID de la campaña o null para todas
+ */
 export function useDonationsManagement(campaignId) {
-  const { data, isLoading, isError, refetch } = useGetDonationsQuery();
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const [completeDonation, { isLoading: isCompleting }] =
-    useCompleteDonationMutation();
-  const [generateCertificate] = useGenerateDonationCertificateMutation();
+  // Función para cargar donaciones desde el backend simulado.
+  const fetchDonations = useCallback(() => {
+    setIsLoading(true);
+    try {
+      const raw = getDonations(campaignId);
+      setItems(raw);
+      setIsError(false);
+    } catch (err) {
+      console.error(err);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [campaignId]);
 
+  // Cargar donaciones al montar el componente o cuando cambie el ID de la campaña.
+  useEffect(() => {
+    fetchDonations();
+  }, [fetchDonations]);
+
+  // Transformar los datos brutos en el formato que consume la UI.
   const donations = useMemo(() => {
-    const raw = data?.data ?? data ?? [];
-
-    return raw
-      .filter((donation) =>
-        campaignId ? donation?.campaign?.id === campaignId : true,
-      )
-      .map((donation) => ({
+    return items.map((donation) => {
+      return {
         id: donation.id,
-        donorName:
-          donation?.donor?.first_name && donation?.donor?.last_name
-            ? `${donation.donor.first_name} ${donation.donor.last_name}`
-            : donation?.donor?.full_name || "Sin nombre",
-        donorEmail: donation?.donor?.email ?? "Sin correo",
-        bloodType:
-          donation?.donor?.blood_type && donation?.donor?.rh_factor
-            ? `${donation.donor.blood_type}${donation.donor.rh_factor}`
-            : (donation?.blood_type ?? "-"),
-        eligibilityStatus: donation?.donor?.eligibility_status ?? "DESCONOCIDO",
-        registrationDate: donation?.scheduled_date
+        donorName: donation.donorName || `Donante ${donation.donorId}`,
+        donorEmail: donation.donorEmail || `${donation.donorId}@example.com`,
+        bloodType: donation.bloodType || "O+",
+        eligibilityStatus: donation.eligibility_status || "DESCONOCIDO",
+        registrationDate: donation.scheduled_date
           ? `${donation.scheduled_date} ${donation.scheduled_time || ""}`
-          : donation?.created_at
+          : donation.created_at
             ? new Date(donation.created_at).toLocaleString()
             : "-",
-        donationStatus: donation?.status ?? "PENDING",
-      }));
-  }, [data, campaignId]);
+        donationStatus: donation.status || "PENDING",
+      };
+    });
+  }, [items]);
 
-  // newStatus se ignora por ahora, para no romper DonationStatusDetails
+  // Actualiza el estado de una donación. Si newStatus es "COMPLETADA"
+  // se marca como completada y se genera un certificado; si es
+  // "RECHAZADA" se cancela la donación.
   const updateStatus = useCallback(
-    async (id, _newStatus) => {
-      const quantity_ml = 450; // valor por defecto
-
-      await completeDonation({ id, quantity_ml }).unwrap();
-      await generateCertificate(id).unwrap();
-      await refetch();
+    (id, newStatus) => {
+      if (newStatus === "COMPLETADA") {
+        completeDonation(id);
+        generateCertificate(id);
+      } else if (newStatus === "RECHAZADA") {
+        cancelDonation(id);
+      }
+      fetchDonations();
     },
-    [completeDonation, generateCertificate, refetch],
+    [fetchDonations],
   );
 
   return {
     donations,
-    isLoading: isLoading || isCompleting,
+    isLoading,
     isError,
     updateStatus,
   };
 }
+
+export default useDonationsManagement;
