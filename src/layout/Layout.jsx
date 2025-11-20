@@ -1,3 +1,4 @@
+// src/layout/Layout.jsx
 import { Button, Box, Typography } from "@mui/material";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { PageContainer } from "@toolpad/core/PageContainer";
@@ -43,118 +44,64 @@ const TopbarContent = () => {
 export default function Layout() {
   const user = useSelector((state) => state.user);
 
-  // Navegación según rol - CORREGIDO
+  /**
+   * Navegación según rol.
+   * Los `segment` son rutas completas que matchean con routes.jsx
+   */
   const navigationMap = {
     donor: [
+      { kind: "header", title: "Donante" },
+      { segment: "donor", title: "Campañas disponibles" },
+      { segment: "donor/my-enrollments", title: "Mis inscripciones" },
+      { segment: "donor/my-donations", title: "Mis donaciones" },
       {
-        kind: "header",
-        title: "Donante",
-      },
-      {
-        segment: "",
-        title: "Campañas disponibles",
-        pattern: "donor",
-      },
-      {
-        segment: "my-donations",
-        title: "Mis donaciones",
-      },
-      {
-        segment: "health-questionnaire",
+        segment: "donor/health-questionnaire",
         title: "Cuestionario de salud",
       },
-      {
-        segment: "role-change",
-        title: "Cambio de rol",
-      },
-      {
-        segment: "profile",
-        title: "Mi perfil",
-      },
+      { segment: "donor/role-change", title: "Cambio de rol" },
+      { segment: "donor/profile", title: "Mi perfil" },
     ],
+
     organizer: [
+      { kind: "header", title: "Organizador" },
+      { segment: "organizer", title: "Mis campañas" },
+      { segment: "organizer/campaigns/new", title: "Crear campaña" },
       {
-        kind: "header",
-        title: "Organizador",
-      },
-      {
-        segment: "",
-        title: "Mis campañas",
-        pattern: "organizer",
-      },
-      {
-        segment: "campaigns/new",
-        title: "Crear campaña",
-      },
-      {
-        segment: "blood-requests",
+        segment: "organizer/blood-requests",
         title: "Solicitudes de sangre",
       },
-      {
-        segment: "profile",
-        title: "Mi perfil",
-      },
+      { segment: "organizer/profile", title: "Mi perfil" },
     ],
+
     volunteer: [
+      { kind: "header", title: "Voluntario" },
+      { segment: "volunteer", title: "Campañas disponibles" },
       {
-        kind: "header",
-        title: "Voluntario",
-      },
-      {
-        segment: "",
-        title: "Campañas disponibles",
-        pattern: "volunteer",
-      },
-      {
-        segment: "my-registrations",
+        segment: "volunteer/my-registrations",
         title: "Mis inscripciones",
       },
-      {
-        segment: "profile",
-        title: "Mi perfil",
-      },
+      { segment: "volunteer/profile", title: "Mi perfil" },
     ],
+
     beneficiary: [
+      { kind: "header", title: "Beneficiario" },
+      { segment: "beneficiary", title: "Mis solicitudes de sangre" },
       {
-        kind: "header",
-        title: "Beneficiario",
-      },
-      {
-        segment: "",
-        title: "Mis solicitudes",
-        pattern: "beneficiary",
-      },
-      {
-        segment: "blood-requests/new",
+        segment: "beneficiary/blood-requests/new",
         title: "Nueva solicitud",
       },
-      {
-        segment: "profile",
-        title: "Mi perfil",
-      },
+      { segment: "beneficiary/profile", title: "Mi perfil" },
     ],
+
     admin: [
+      { kind: "header", title: "Administrador" },
+      { segment: "admin", title: "Usuarios" },
       {
-        kind: "header",
-        title: "Administrador",
+        segment: "admin/role-requests",
+        title: "Solicitudes de cambio de rol",
       },
-      {
-        segment: "",
-        title: "Usuarios",
-        pattern: "admin",
-      },
-      {
-        segment: "role-requests",
-        title: "Solicitudes de rol",
-      },
-      {
-        segment: "centers",
-        title: "Centros de donación",
-      },
-      {
-        segment: "profile",
-        title: "Mi perfil",
-      },
+      { segment: "admin/centers", title: "Centros de donación" },
+      { segment: "admin/profile", title: "Mi perfil" },
     ],
   };
 
@@ -165,6 +112,9 @@ export default function Layout() {
       slots={{
         toolbarActions: TopbarContent,
       }}
+      // 👇 IMPORTANTE: pasarle la navegación al layout
+      navigation={navItems}
+      sx={{ minHeight: "100vh" }}
     >
       <PageContainer
         sx={{

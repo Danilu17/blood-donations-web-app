@@ -1,5 +1,5 @@
-// src/pages/organizer/CreateCampaignView.jsx
-import { useState } from "react";
+// src/pages/organizer/EditCampaignView.jsx
+import { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -7,23 +7,27 @@ import {
   Typography,
   Paper,
   Alert,
+  CircularProgress,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  useGetCampaignByIdQuery,
+  useUpdateCampaignMutation,
+} from "../../apis/campaigns.api";
 
-const STORAGE_KEY = "mock_campaigns";
-
-function saveCampaignMock(campaign) {
-  const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  existing.push(campaign);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
-}
-
-export default function CreateCampaignView() {
+export default function EditCampaignView() {
+  const { id } = useParams();
   const navigate = useNavigate();
+
+  const { data: campaign, isLoading: loadingCampaign } =
+    useGetCampaignByIdQuery(id, {
+      skip: !id,
+    });
+
+  const [updateCampaign, { isLoading }] = useUpdateCampaignMutation();
+
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
   const [formData, setFormData] = useState({
     name: "",
     location: "",
@@ -33,6 +37,20 @@ export default function CreateCampaignView() {
     end_time: "",
     max_donors: "",
   });
+
+  useEffect(() => {
+    if (campaign) {
+      setFormData({
+        name: campaign.name || "",
+        location: campaign.location || "",
+        address: campaign.address || "",
+        campaign_date: campaign.campaign_date || "",
+        start_time: campaign.start_time || "",
+        end_time: campaign.end_time || "",
+        max_donors: campaign.max_donors?.toString() || "",
+      });
+    }
+  }, [campaign]);
 
   const validateField = (name, value) => {
     const newErrors = { ...errors };
@@ -72,15 +90,14 @@ export default function CreateCampaignView() {
         }
         break;
 
-      case "max_donors": {
-        const num = parseInt(value, 10);
+      case "max_donors":
+        const num = parseInt(value);
         if (!value || isNaN(num) || num < 1) {
           newErrors[name] = "Debe ser un número mayor a 0";
         } else {
           delete newErrors[name];
         }
         break;
-      }
 
       default:
         break;
@@ -96,7 +113,7 @@ export default function CreateCampaignView() {
     validateField(name, value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setApiError("");
 
@@ -109,6 +126,7 @@ export default function CreateCampaignView() {
       "end_time",
       "max_donors",
     ];
+
     let isValid = true;
 
     requiredFields.forEach((field) => {
@@ -122,46 +140,50 @@ export default function CreateCampaignView() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
       const payload = {
-        id:
-          typeof crypto !== "undefined" && crypto.randomUUID
-            ? crypto.randomUUID()
-            : Date.now().toString(),
+        id,
         name: formData.name.trim(),
         location: formData.location.trim(),
         address: formData.address.trim(),
         campaign_date: formData.campaign_date,
         start_time: formData.start_time,
         end_time: formData.end_time,
-        max_donors: parseInt(formData.max_donors, 10),
-        current_donors: 0,
-        status: "ACTIVA",
-        created_at: new Date().toISOString(),
+        max_donors: parseInt(formData.max_donors),
       };
 
-      console.log("Guardando campaña MOCK:", payload);
-      saveCampaignMock(payload);
-
-      setTimeout(() => {
-        setIsLoading(false);
-        navigate("/organizer");
-      }, 500);
+      await updateCampaign(payload).unwrap();
+      alert("Campaña actualizada correctamente");
+      navigate("/organizer");
     } catch (error) {
-      console.error("Error en mock de campaña:", error);
-      setIsLoading(false);
-      setApiError(
-        "Error al crear la campaña en el demo local. Intenta nuevamente.",
-      );
+      console.error("Error al actualizar campaña:", error);
+
+      if (error.data?.message) {
+        if (Array.isArray(error.data.message)) {
+          setApiError(error.data.message.join(", "));
+        } else {
+          setApiError(error.data.message);
+        }
+      } else {
+        setApiError(
+          "Error al actualizar la campaña. Por favor intenta nuevamente.",
+        );
+      }
     }
   };
+
+  if (loadingCampaign) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Paper sx={{ p: 4, maxWidth: 800, mx: "auto" }}>
       <Typography variant="h5" gutterBottom>
-        Crear Nueva Campaña
+        Editar Campaña
       </Typography>
 
       {apiError && (
@@ -275,7 +297,7 @@ export default function CreateCampaignView() {
             fullWidth
             disabled={isLoading}
           >
-            Atrás
+            Cancelar
           </Button>
           <Button
             type="submit"
@@ -284,7 +306,7 @@ export default function CreateCampaignView() {
             fullWidth
             disabled={isLoading || Object.keys(errors).length > 0}
           >
-            {isLoading ? "Creando..." : "Crear campaña"}
+            {isLoading ? "Guardando..." : "Guardar cambios"}
           </Button>
         </Box>
       </Box>

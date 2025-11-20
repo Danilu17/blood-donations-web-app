@@ -1,6 +1,6 @@
 // src/pages/auth/Login.jsx
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
   Paper,
@@ -12,12 +12,32 @@ import {
   IconButton,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { FormProvider } from "react-hook-form";
-import useLogin from "./hooks/useLogin";
+import { FormProvider, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../stores/user/slice.js";
+
+const USERS_STORAGE_KEY = "mock_users";
+
+function findUserByEmail(email) {
+  const users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || "[]");
+  return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+}
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const { methods, onSubmit, isSubmitting } = useLogin();
+  const [loginError, setLoginError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const methods = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
   const {
     register,
     handleSubmit,
@@ -26,6 +46,58 @@ function Login() {
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
+  };
+
+  const onSubmit = (data) => {
+    setLoginError("");
+    setIsSubmitting(true);
+
+    const { email, password } = data;
+
+    // 1) Intentamos encontrar un usuario registrado en localStorage
+    const user = findUserByEmail(email);
+
+    if (user) {
+      if (user.password !== password) {
+        setIsSubmitting(false);
+        setLoginError("Contraseña incorrecta.");
+        return;
+      }
+      const loggedUser = {
+        ...user,
+        password: undefined,
+      };
+      dispatch(setUser(loggedUser));
+      localStorage.setItem("user", JSON.stringify(loggedUser));
+      setTimeout(() => {
+        setIsSubmitting(false);
+        navigate("/");
+      }, 500);
+      return;
+    }
+
+    // 2) Si no existe en mock_users, usamos usuarios de DEMO por mail
+    let role = "donor";
+    if (email === "organizerr@example.com") role = "organizer";
+    if (email === "adminn@example.com") role = "admin";
+    if (email === "volunteerr@example.com") role = "volunteer";
+    if (email === "beneficiaryy@example.com") role = "beneficiary";
+
+    const demoUser = {
+      id: "demo-user",
+      first_name: "Demo",
+      last_name: "User",
+      email,
+      role,
+    };
+
+    dispatch(setUser(demoUser));
+    localStorage.setItem("user", JSON.stringify(demoUser));
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+      navigate("/");
+    }, 500);
   };
 
   return (
@@ -93,6 +165,17 @@ function Login() {
               }}
             />
 
+            {loginError && (
+              <Typography
+                variant="body2"
+                color="error"
+                sx={{ mt: 1, mb: 1 }}
+                textAlign="center"
+              >
+                {loginError}
+              </Typography>
+            )}
+
             <Box
               sx={{
                 display: "flex",
@@ -144,25 +227,16 @@ function Login() {
             Credenciales de prueba (modo demo)
           </Typography>
           <Typography variant="caption" display="block" textAlign="center">
-            Donante: <strong>donorr@example.com</strong> /{" "}
-            <strong>Password123!</strong>
+            Donante (demo): <strong>donorr@example.com</strong> /{" "}
+            <strong>Cualquier contraseña</strong>
           </Typography>
           <Typography variant="caption" display="block" textAlign="center">
-            Organizador: <strong>organizerr@example.com</strong> /{" "}
-            <strong>Password123!</strong>
+            Organizador (demo): <strong>organizerr@example.com</strong> /{" "}
+            <strong>Cualquier contraseña</strong>
           </Typography>
           <Typography variant="caption" display="block" textAlign="center">
-            Administrador: <strong>adminn@example.com</strong> /{" "}
-            <strong>Password123!</strong>
-          </Typography>
-          <Typography
-            variant="caption"
-            display="block"
-            textAlign="center"
-            mt={1}
-            color="text.secondary"
-          >
-            (Recordá crear estos usuarios en tu base de datos para usarlos.)
+            Administrador (demo): <strong>adminn@example.com</strong> /{" "}
+            <strong>Cualquier contraseña</strong>
           </Typography>
         </Box>
       </Paper>

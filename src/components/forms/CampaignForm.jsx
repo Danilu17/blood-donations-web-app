@@ -165,19 +165,19 @@ export default function CampaignForm() {
       // Usa el payload apropiado según tu endpoint
       const payload = createCampaignPayload; // o proposeCampaignPayload
 
-      const response = await fetch("/api/campaigns", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      // const response = await fetch("/api/campaigns", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      //   },
+      //   body: JSON.stringify(payload),
+      // });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Error al crear la campaña");
-      }
+      // if (!response.ok) {
+      //   const error = await response.json();
+      //   throw new Error(error.message || "Error al crear la campaña");
+      // }
 
       // Redirigir al listado
       navigate("/organizer");

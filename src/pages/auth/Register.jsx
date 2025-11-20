@@ -12,11 +12,17 @@ import {
   Checkbox,
   CircularProgress,
 } from "@mui/material";
-import { useRegisterUserMutation } from "../../apis/auth.api";
+
+const USERS_STORAGE_KEY = "mock_users";
+
+function saveUserMock(user) {
+  const existing = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || "[]");
+  existing.push(user);
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(existing));
+}
 
 function Register() {
   const navigate = useNavigate();
-  const [registerUser, { isLoading }] = useRegisterUserMutation();
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -32,6 +38,7 @@ function Register() {
   });
   const [errorMsg, setErrorMsg] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -41,7 +48,7 @@ function Register() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setErrorMsg("");
     setInfoMsg("");
@@ -55,8 +62,14 @@ function Register() {
       return setErrorMsg("Las contraseñas no coinciden.");
     }
 
+    setIsLoading(true);
+
     try {
-      const payload = {
+      const newUser = {
+        id:
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : Date.now().toString(),
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         dni: form.dni.trim(),
@@ -67,15 +80,22 @@ function Register() {
         address: form.address.trim(),
         password: form.password,
         accepts_terms: form.accepts_terms,
+        role: "donor", // por defecto todos se registran como donantes
       };
-      const res = await registerUser(payload).unwrap();
-      setInfoMsg(res.message);
-      // Redirige al login tras 2 segundos
-      setTimeout(() => navigate("/login"), 2000);
+
+      saveUserMock(newUser);
+      setInfoMsg(
+        "Cuenta creada en modo demo. Ahora podés iniciar sesión con tu correo y contraseña.",
+      );
+
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate("/login");
+      }, 1500);
     } catch (error) {
-      const msg =
-        error?.data?.message || "Error al registrarse. Verifica los datos.";
-      setErrorMsg(Array.isArray(msg) ? msg.join(", ") : msg);
+      console.error("Error en registro mock:", error);
+      setIsLoading(false);
+      setErrorMsg("Error al registrarse. Verifica los datos.");
     }
   };
 
@@ -197,6 +217,7 @@ function Register() {
               required
             />
           </Box>
+
           <Box
             sx={{
               backgroundColor: "#fff7e6",
@@ -216,6 +237,7 @@ function Register() {
               campañas relevantes.
             </p>
           </Box>
+
           <FormControlLabel
             control={
               <Checkbox
@@ -226,6 +248,7 @@ function Register() {
             }
             label="Acepto el consentimiento informado"
           />
+
           {errorMsg && (
             <Typography color="error" variant="body2" mt={1}>
               {errorMsg}
@@ -236,6 +259,7 @@ function Register() {
               {infoMsg}
             </Typography>
           )}
+
           <Button
             fullWidth
             type="submit"
@@ -246,6 +270,7 @@ function Register() {
             {isLoading ? <CircularProgress size={22} /> : "Crear cuenta"}
           </Button>
         </form>
+
         <Box mt={2}>
           <Typography variant="body2">
             ¿Ya tenés cuenta? <Link to="/login">Iniciar sesión</Link>

@@ -28,11 +28,8 @@ const CampaignEnrollmentsView = () => {
   const { id: campaignId } = useParams();
   const navigate = useNavigate();
 
-  const {
-    data: campaign,
-    isLoading: loadingCampaign,
-    isError: errorCampaign,
-  } = useGetCampaignByIdQuery(campaignId, { skip: !campaignId });
+  const { data: campaign, isLoading: loadingCampaign } =
+    useGetCampaignByIdQuery(campaignId, { skip: !campaignId });
 
   const { data, isLoading, isError } = useGetCampaignEnrollmentsQuery(
     campaignId,
@@ -134,8 +131,9 @@ const CampaignEnrollmentsView = () => {
               <TableRow>
                 <TableCell>Donante</TableCell>
                 <TableCell>Email</TableCell>
-                <TableCell>Horario pref.</TableCell>
-                <TableCell>Notas</TableCell>
+                <TableCell>Grupo sanguíneo</TableCell>
+                <TableCell>Estado elegibilidad</TableCell>
+                <TableCell>Fecha inscripción</TableCell>
                 <TableCell>Estado</TableCell>
                 <TableCell align="right">Acciones</TableCell>
               </TableRow>
@@ -156,8 +154,18 @@ const CampaignEnrollmentsView = () => {
                       {donor.first_name} {donor.last_name}
                     </TableCell>
                     <TableCell>{donor.email}</TableCell>
-                    <TableCell>{en.preferred_time || "-"}</TableCell>
-                    <TableCell>{en.notes || "-"}</TableCell>
+                    <TableCell>
+                      {donor.blood_type}
+                      {donor.rh_factor}
+                    </TableCell>
+                    <TableCell>
+                      {donor.eligibility_status || "Sin evaluar"}
+                    </TableCell>
+                    <TableCell>
+                      {en.created_at
+                        ? new Date(en.created_at).toLocaleDateString()
+                        : "-"}
+                    </TableCell>
                     <TableCell>{renderStatusChip(status)}</TableCell>
                     <TableCell align="right">
                       <Stack
@@ -167,7 +175,7 @@ const CampaignEnrollmentsView = () => {
                       >
                         <Button
                           size="small"
-                          variant="outlined"
+                          variant="contained"
                           disabled={!canConfirm || confirming}
                           onClick={() => handleConfirm(en.id)}
                         >

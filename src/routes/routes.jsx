@@ -14,11 +14,14 @@ import AvailableCampaignsViewDon from "../pages/donor/AvailableCampaignssViewDon
 import MyDonationsView from "../pages/donor/MyDonationsView.jsx";
 import HealthQuestionnairePage from "../pages/donor/HealthQuestionnairePage.jsx";
 import RoleChangeRequestPage from "../pages/donor/RoleChangeRequestPage.jsx";
+import MyEnrollmentsView from "../pages/donor/MyEnrollmentsView.jsx";
 
 // Organizer pages
 import CreateCampaignView from "../pages/organizer/CreateCampaignView.jsx";
 import MyCampaignsView from "../pages/organizer/MyCampaignsView.jsx";
 import BloodRequestsView from "../pages/organizer/BloodRequestsView.jsx";
+import CampaignEnrollmentsView from "../pages/organizer/CampaignEnrollmentsView.jsx";
+import CampaignDonationsView from "../pages/organizer/CampaignDonationsView.jsx";
 
 // Volunteer pages
 import AvailableCampaignsViewVol from "../pages/volunteer/AvailableCampaignsViewVol.jsx";
@@ -33,7 +36,7 @@ import UsersManagementView from "../pages/admin/UsersManagementView.jsx";
 import RoleChangeRequestsView from "../pages/admin/RoleChangeRequestsView.jsx";
 import CentersManagementView from "../pages/admin/CentersManagementView.jsx";
 
-// Profile
+// Profile & Common
 import ProfileView from "../pages/profile/ProfileView.jsx";
 import CentersView from "../pages/common/CentersView.jsx";
 
@@ -95,6 +98,7 @@ export const routes = [
             children: [
               { index: true, element: <AvailableCampaignsViewDon /> },
               { path: "my-donations", element: <MyDonationsView /> },
+              { path: "my-enrollments", element: <MyEnrollmentsView /> },
               {
                 path: "health-questionnaire",
                 element: <HealthQuestionnairePage />,
@@ -111,6 +115,14 @@ export const routes = [
               { index: true, element: <MyCampaignsView /> },
               { path: "campaigns/new", element: <CreateCampaignView /> },
               { path: "campaigns/:id/edit", element: <CreateCampaignView /> },
+              {
+                path: "campaigns/:id/enrollments",
+                element: <CampaignEnrollmentsView />,
+              },
+              {
+                path: "campaigns/:id/donations",
+                element: <CampaignDonationsView />,
+              },
               { path: "blood-requests", element: <BloodRequestsView /> },
               { path: "profile", element: <ProfileView /> },
             ],
