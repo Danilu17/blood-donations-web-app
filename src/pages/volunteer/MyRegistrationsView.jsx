@@ -1,7 +1,7 @@
 import { Box, Typography, Paper } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useGetMyVolunteerRegistrationsQuery } from "../../apis/volunteers.api";
-import GenericTable from "../../components/ui/GenericTable";
+import GenericTable from "../../components/tables/GenericTable";
 
 function MyRegistrationsView() {
   const userId = useSelector((state) => state.user.id);

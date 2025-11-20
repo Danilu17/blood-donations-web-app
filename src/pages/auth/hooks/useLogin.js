@@ -17,10 +17,15 @@ export default function useLogin() {
   const onSubmit = async ({ email, password }) => {
     try {
       const res = await loginUser({ email, password }).unwrap();
-      // res = { message, data: { access_token, user } }
+      // Se asume: res = { message, data: { access_token, user } }
       const { user } = res.data;
+
+      // Guardamos el usuario en Redux.
+      // El slice ya se encarga de poner role en minúsculas.
       dispatch(setUser(user));
-      navigate("/");
+
+      // Luego del login vamos a "/"
+      navigate("/", { replace: true });
     } catch (error) {
       const msg =
         error?.data?.message || "Error al iniciar sesión. Verificá tus datos.";

@@ -15,6 +15,7 @@ import ErrorPage from "../pages/errorPage.jsx";
 import AvailableCampaignsViewDon from "../pages/donor/AvailableCampaignssViewDon.jsx";
 import MyDonationsView from "../pages/donor/MyDonationsView.jsx";
 import HealthQuestionnairePage from "../pages/donor/HealthQuestionnairePage.jsx";
+import RoleChangeRequestPage from "../pages/donor/RoleChangeRequestPage.jsx";
 
 // Shared pages
 import ProfileView from "../pages/profile/ProfileView.jsx";
@@ -30,6 +31,8 @@ import MyRegistrationsView from "../pages/volunteer/MyRegistrationsView.jsx";
 
 /**
  * Layout protegido:
+ * Si no hay rol → al login.
+ * Si hay rol → se muestra el Layout (navbar, etc.) con sus rutas hijas.
  */
 const ProtectedLayout = () => {
   const userRole = useSelector((state) => state.user.role);
@@ -43,6 +46,8 @@ const ProtectedLayout = () => {
 
 /**
  * Redirección según rol:
+ * role lo tenemos SIEMPRE en minúsculas por el slice:
+ *   "donor" | "organizer" | "volunteer"
  */
 const DashboardRedirect = () => {
   const userRole = useSelector((state) => state.user.role);
@@ -69,45 +74,43 @@ export const routes = [
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
-      // PUBLIC AUTH ROUTES
+      // ============================
+      //      RUTAS PÚBLICAS
+      // ============================
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "forgot-password", element: <ForgotPassword /> },
-
-      // RESET PASSWORD CON TOKEN EN LA URL
       { path: "reset-password/:token", element: <ResetPassword /> },
 
-      // RUTAS PROTEGIDAS
+      // ============================
+      //      RUTAS PROTEGIDAS
+      // ============================
       {
-        path: "/",
         element: <ProtectedLayout />,
         children: [
+          // Cuando el usuario logueado entra a "/"
           { index: true, element: <DashboardRedirect /> },
 
-          // ============================
-          //       DONOR ROUTES
-          // ============================
+          // DONOR ROUTES
           {
             path: "donor",
             children: [
               { index: true, element: <AvailableCampaignsViewDon /> },
-              { path: "campaigns", element: <AvailableCampaignsViewDon /> },
+              { path: "", element: <AvailableCampaignsViewDon /> },
               { path: "my-donations", element: <MyDonationsView /> },
               {
                 path: "health-questionnaire",
                 element: <HealthQuestionnairePage />,
               },
+              { path: "role-change", element: <RoleChangeRequestPage /> },
               { path: "profile", element: <ProfileView /> },
             ],
           },
 
-          // ============================
-          //     ORGANIZER ROUTES
-          // ============================
+          // ORGANIZER ROUTES
           {
             path: "organizer",
             children: [
-              // Home de organizador: campañas propias / crear campaña
               { index: true, element: <CreateCampaignView /> },
               { path: "create-campaign", element: <CreateCampaignView /> },
               { path: "donations", element: <DonationsManagementView /> },
@@ -123,17 +126,12 @@ export const routes = [
             ],
           },
 
-          // ============================
-          //     VOLUNTEER ROUTES
-          // ============================
+          // VOLUNTEER ROUTES
           {
             path: "volunteer",
             children: [
               { index: true, element: <AvailableCampaignsViewVol /> },
-              {
-                path: "my-registrations",
-                element: <MyRegistrationsView />,
-              },
+              { path: "my-registrations", element: <MyRegistrationsView /> },
               { path: "profile", element: <ProfileView /> },
             ],
           },

@@ -1,131 +1,120 @@
 // src/pages/donor/MyDonationsView.jsx
 import { useState } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  CircularProgress,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Button,
-} from "@mui/material";
-import { useGetMyDonationsQuery } from "../../apis/donations.api";
-import { useLazyDownloadCertificateQuery } from "../../apis/certificates.api";
+import { Button } from "@mui/material";
 
-const getErrorMessage = (error, fallback) => {
-  if (!error) return fallback;
-  const data = error.data;
-  let msg =
-    data?.message ||
-    (typeof error.error === "string" && error.error) ||
-    fallback;
-  return Array.isArray(msg) ? msg.join(", ") : msg;
-};
+import useMyDonationsListView from "./hooks/useMyDonationsListView.jsx";
+import useSearchAccordion from "../../components/tables/hooks/useSearchAccordion.js";
+import GenericTable from "../../components/tables/GenericTable.jsx";
+import { Navigate } from "react-router-dom";
 
-function MyDonationsView() {
-  const [downloadingId, setDownloadingId] = useState(null);
+// 🔍 Campos de filtro para el historial de donaciones
+const searchFields = [
+  {
+    name: "campaign",
+    label: "Campaña",
+    defaultValue: "",
+  },
+  {
+    name: "center",
+    label: "Centro de donación",
+    defaultValue: "",
+  },
+  {
+    name: "dateFrom",
+    label: "Fecha desde",
+    defaultValue: "",
+    inputType: "date",
+  },
+  {
+    name: "dateTo",
+    label: "Fecha hasta",
+    defaultValue: "",
+    inputType: "date",
+  },
+  {
+    name: "status",
+    label: "Estado",
+    defaultValue: "",
+    inputType: "select",
+    options: [
+      { label: "Todas", value: "" },
+      { label: "Completada", value: "COMPLETED" },
+      { label: "Pendiente", value: "PENDING" },
+      { label: "Cancelada", value: "CANCELLED" },
+    ],
+  },
+];
 
-  const { data, isLoading, error } = useGetMyDonationsQuery();
+export default function MyDonationsView() {
+  const [page, setPage] = useState(0); // MUI es 0-based
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const [triggerDownload] = useLazyDownloadCertificateQuery();
+  const { searchValue, handleSearch, handleClear } = useSearchAccordion();
 
-  const donations = data?.results || data?.items || data?.data || data || [];
+  const { donations, totalCount, isLoading, isError, error } =
+    useMyDonationsListView(searchValue, page + 1, rowsPerPage);
 
-  const errorMsg = error
-    ? getErrorMessage(error, "Error al cargar historial de donaciones.")
-    : "";
-
-  const handleDownload = async (id) => {
-    setDownloadingId(id);
-    try {
-      const blob = await triggerDownload(id).unwrap();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `certificado-donacion-${id}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (e) {
-      // opcional: podrías mostrar un error en pantalla
-      console.error("Error descargando certificado", e);
-    } finally {
-      setDownloadingId(null);
-    }
+  const handleOpenCertificate = (row) => {
+    if (!row.certificate_url) return;
+    window.open(row.certificate_url, "_blank", "noopener,noreferrer");
   };
 
-  if (isLoading) {
-    return (
-      <Box p={3} textAlign="center">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const columns = [
+    { id: "date", label: "FECHA", type: "date" },
+    { id: "campaign_name", label: "CAMPAÑA" },
+    { id: "center_name", label: "CENTRO" },
+    { id: "donation_type", label: "TIPO DE DONACIÓN" },
+    { id: "volume_ml", label: "CANTIDAD (ml)", align: "right" },
+    { id: "status", label: "ESTADO" },
+    {
+      id: "certificate",
+      label: "CERTIFICADO",
+      align: "center",
+      render: (row) => (
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation(); // por si después hacés onRowClick
+            handleOpenCertificate(row);
+          }}
+          disabled={!row.certificate_url}
+        >
+          Ver PDF
+        </Button>
+      ),
+    },
+  ];
+
+  const handleCreateDonation = () => {
+    // 👉 Ruta a la página de campañas disponibles
+    Navigate("/campaigns/available");
+  };
 
   return (
-    <Box p={3}>
-      <Typography variant="h5" mb={2}>
-        Mi historial de donaciones
-      </Typography>
-
-      {errorMsg && (
-        <Typography color="error" variant="body2" mb={2}>
-          {errorMsg}
-        </Typography>
-      )}
-
-      <Paper>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Fecha</TableCell>
-              <TableCell>Centro</TableCell>
-              <TableCell>Tipo de sangre</TableCell>
-              <TableCell>Cantidad</TableCell>
-              <TableCell>Estado</TableCell>
-              <TableCell>Certificado</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {donations.map((d) => (
-              <TableRow key={d.id}>
-                <TableCell>{d.date}</TableCell>
-                <TableCell>{d.center_name || d.center?.name}</TableCell>
-                <TableCell>
-                  {d.blood_type} {d.rh_factor}
-                </TableCell>
-                <TableCell>{d.units || d.amount}</TableCell>
-                <TableCell>{d.status}</TableCell>
-                <TableCell>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => handleDownload(d.id)}
-                    disabled={downloadingId === d.id}
-                  >
-                    {downloadingId === d.id
-                      ? "Descargando..."
-                      : "Descargar PDF"}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {donations.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  Todavía no tenés donaciones registradas.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </Paper>
-    </Box>
+    <GenericTable
+      title="Historial de Donaciones"
+      subtitle="Consulta tus donaciones realizadas, filtra por fecha o centro y descarga tus certificados."
+      columns={columns}
+      data={donations}
+      isLoading={isLoading}
+      isError={isError}
+      error={error}
+      searchFields={searchFields}
+      onSearch={handleSearch}
+      onClear={handleClear}
+      pagination={{
+        count: totalCount, // si tu backend aún no manda total, podés dejar -1
+        page,
+        rowsPerPage,
+      }}
+      onPageChange={(e, newPage) => setPage(newPage)}
+      onRowsPerPageChange={(e) => {
+        setRowsPerPage(parseInt(e.target.value, 10));
+        setPage(0);
+      }}
+      // si en el futuro querés ver detalle de la donación:
+      // onRowClick={(row) => navigate(`/donor/donations/${row.id}`)}
+    />
   );
 }
-
-export default MyDonationsView;

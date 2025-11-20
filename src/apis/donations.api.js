@@ -4,11 +4,19 @@ import { baseApi } from "./base.api";
 export const donationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getMyDonations: builder.query({
-      query: () => ({
-        url: "/donations/me",
+      query: ({ page = 1, limit = 5, ...filters } = {}) => ({
+        url: "/donations/",
         method: "GET",
+        params: {
+          page,
+          limit,
+          date_from: filters.dateFrom,
+          date_to: filters.dateTo,
+          campaign: filters.campaign,
+          center: filters.center,
+          status: filters.status,
+        },
       }),
-      providesTags: ["Donations"],
     }),
 
     getDonationsByCampaign: builder.query({

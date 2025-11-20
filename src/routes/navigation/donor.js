@@ -1,22 +1,28 @@
+// src/routes/navigation/donor.js
 const DONOR_NAVIGATION = [
   {
     segment: "donor",
-    title: "Campañas Disponibles",
+    title: "Campañas disponibles",
     icon: "",
   },
   {
     segment: "donor/my-donations",
-    title: "Mis Donaciones",
+    title: "Mis donaciones",
     icon: "",
   },
   {
     segment: "donor/health-questionnaire",
-    title: "Cuestionario de Salud",
+    title: "Cuestionario de salud",
+    icon: "",
+  },
+  {
+    segment: "donor/role-change",
+    title: "Cambio de rol",
     icon: "",
   },
   {
     segment: "donor/profile",
-    title: "Mi Perfil",
+    title: "Mi perfil",
     icon: "",
   },
 ];

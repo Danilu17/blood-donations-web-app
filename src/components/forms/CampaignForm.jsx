@@ -1,205 +1,147 @@
-import { Box, Grid, Button, Paper, Typography, Alert } from "@mui/material";
-import { FormProvider } from "react-hook-form";
-import FormTextField from "../forms/FormTextField";
-import FormSelectField from "../forms/FormSelectField";
-import { CAMPAIGN_STATUS_OPTIONS } from "../../constants/blood-donation.constants";
+// src/pages/organizer/CampaignForm.jsx
+import { FormProvider, Controller } from "react-hook-form";
+import { Box, Paper, Typography, TextField, Button, Grid } from "@mui/material";
 
-function CampaignForm({ form, onSubmit, isLoading, error, organizerId }) {
+function CampaignForm({ form, onSubmit, isSubmitting }) {
+  const { handleSubmit, control } = form;
+
   return (
     <FormProvider {...form}>
       <Paper
         sx={{
-          maxWidth: 800,
+          maxWidth: 900,
           mx: "auto",
+          mt: 4,
           p: 3,
-          bgcolor: "white",
           borderRadius: 2,
+          boxShadow: 3,
         }}
       >
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          Nueva Campaña de Donación
+        <Typography variant="h5" mb={2}>
+          Crear campaña de donación
         </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error.message || "Error al crear campaña"}
-          </Alert>
-        )}
-
-        <Box
-          component="form"
-          onSubmit={form.handleSubmit((data) =>
-            onSubmit({ ...data, organizerId }),
-          )}
-          sx={{ "& > *": { mb: 0 } }}
-        >
-          <Grid container columnSpacing={3} rowSpacing={2}>
-            <Grid size={{ xs: 12 }}>
-              <FormTextField
-                name="name"
-                label="Nombre de la Campaña"
-                required
-                fullWidth
-                rules={{
-                  required: "El nombre es obligatorio",
-                }}
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <Grid container spacing={2}>
+            {/* Título */}
+            <Grid item xs={12}>
+              <Controller
+                name="title"
+                control={control}
+                rules={{ required: "El título es obligatorio" }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextField
+                    {...field}
+                    label="Título de la campaña"
+                    fullWidth
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
               />
             </Grid>
-          </Grid>
 
-          <Grid container columnSpacing={3} rowSpacing={2}>
-            <Grid size={{ xs: 12 }}>
-              <FormTextField
+            {/* Descripción */}
+            <Grid item xs={12}>
+              <Controller
                 name="description"
-                label="Descripción"
-                required
-                fullWidth
-                multiline
-                rows={3}
-                rules={{
-                  required: "La descripción es obligatoria",
-                }}
+                control={control}
+                rules={{ required: "La descripción es obligatoria" }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextField
+                    {...field}
+                    label="Descripción"
+                    fullWidth
+                    multiline
+                    minRows={3}
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
               />
             </Grid>
-          </Grid>
 
-          <Grid container columnSpacing={3} rowSpacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormTextField
-                name="location"
-                label="Lugar"
-                required
-                fullWidth
-                rules={{
-                  required: "El lugar es obligatorio",
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormTextField
-                name="address"
-                label="Dirección"
-                required
-                fullWidth
-                rules={{
-                  required: "La dirección es obligatoria",
-                }}
-              />
-            </Grid>
-          </Grid>
-
-          <Grid container columnSpacing={3} rowSpacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormTextField
+            {/* Fecha inicio */}
+            <Grid item xs={12} md={6}>
+              <Controller
                 name="start_date"
-                label="Fecha de Inicio"
-                required
-                type="date"
-                fullWidth
-                rules={{
-                  required: "La fecha de inicio es obligatoria",
-                }}
+                control={control}
+                rules={{ required: "La fecha de inicio es obligatoria" }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextField
+                    {...field}
+                    label="Fecha de inicio"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormTextField
+
+            {/* Fecha fin */}
+            <Grid item xs={12} md={6}>
+              <Controller
                 name="end_date"
-                label="Fecha de Fin"
-                required
-                type="date"
-                fullWidth
-                rules={{
-                  required: "La fecha de fin es obligatoria",
-                }}
+                control={control}
+                rules={{ required: "La fecha de fin es obligatoria" }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextField
+                    {...field}
+                    label="Fecha de fin"
+                    type="date"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
               />
             </Grid>
-          </Grid>
 
-          <Grid container columnSpacing={3} rowSpacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormTextField
-                name="start_time"
-                label="Hora de Inicio"
-                required
-                type="time"
-                fullWidth
-                rules={{
-                  required: "La hora de inicio es obligatoria",
-                }}
+            {/* Ubicación */}
+            <Grid item xs={12}>
+              <Controller
+                name="location"
+                control={control}
+                rules={{ required: "La ubicación es obligatoria" }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextField
+                    {...field}
+                    label="Lugar / dirección"
+                    fullWidth
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormTextField
-                name="end_time"
-                label="Hora de Fin"
-                required
-                type="time"
-                fullWidth
-                rules={{
-                  required: "La hora de fin es obligatoria",
-                }}
-              />
-            </Grid>
-          </Grid>
 
-          <Grid container columnSpacing={3} rowSpacing={2}>
-            <Grid size={{ xs: 12 }}>
-              <FormTextField
-                name="requirements"
-                label="Requisitos"
-                required
-                fullWidth
-                multiline
-                rows={2}
-                rules={{
-                  required: "Los requisitos son obligatorios",
-                }}
-              />
-            </Grid>
-          </Grid>
-
-          <Grid container columnSpacing={3} rowSpacing={2}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormTextField
+            {/* Cupo máximo de donantes */}
+            <Grid item xs={12} md={6}>
+              <Controller
                 name="max_donors"
-                label="Máximo de Donantes"
-                required
-                type="number"
-                fullWidth
-                defaultValue="50"
-                rules={{
-                  required: "El máximo de donantes es obligatorio",
-                  min: { value: 1, message: "Mínimo 1 donante" },
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormSelectField
-                name="status"
-                label="Estado"
-                options={CAMPAIGN_STATUS_OPTIONS}
-                fullWidth
-                defaultValue="scheduled"
+                control={control}
+                rules={{ required: "El cupo es obligatorio" }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextField
+                    {...field}
+                    label="Cupo máximo de donantes"
+                    type="number"
+                    fullWidth
+                    error={!!error}
+                    helperText={error?.message}
+                  />
+                )}
               />
             </Grid>
           </Grid>
 
-          <Box
-            sx={{ mt: 3, display: "flex", justifyContent: "center", gap: 2 }}
-          >
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={isLoading}
-              sx={{
-                backgroundColor: "#dc2626",
-                "&:hover": { backgroundColor: "#b91c1c" },
-                borderRadius: 2,
-                px: 4,
-                py: 1.5,
-              }}
-            >
-              {isLoading ? "Creando..." : "Crear Campaña"}
+          <Box mt={3} display="flex" justifyContent="flex-end">
+            <Button type="submit" variant="contained" disabled={isSubmitting}>
+              {isSubmitting ? "Guardando..." : "Crear campaña"}
             </Button>
           </Box>
         </Box>

@@ -1,5 +1,5 @@
 import { Box, Typography, Paper, Button, Stack } from "@mui/material";
-import GenericTable from "../../components/ui/GenericTable";
+import GenericTable from "../../components/tables/GenericTable";
 import { useParams } from "react-router-dom";
 import { useDonationsManagement } from "../../hooks/useDonationsManagement";
 import DonationStatusDetails from "./DonationStatusDetails";

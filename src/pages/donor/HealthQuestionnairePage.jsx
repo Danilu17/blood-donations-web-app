@@ -41,7 +41,6 @@ function HealthQuestionnairePage() {
   const [message, setMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // RTK Query
   const { data: lastQuestionnaire, isLoading: loadingLast } =
     useGetMyLastQuestionnaireQuery();
 
@@ -63,7 +62,7 @@ function HealthQuestionnairePage() {
       setErrorMsg(
         getErrorMessage(
           submitError,
-          "Error al enviar el cuestionario. Intentalo de nuevo.",
+          "Error al enviar el cuestionario. Inténtalo de nuevo.",
         ),
       );
     }
@@ -74,6 +73,7 @@ function HealthQuestionnairePage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Valida peso, grupo Rh y la fecha de última donación (mínimo 60 días de diferencia).
   const validate = () => {
     const weightNumber = Number(form.weight);
     if (Number.isNaN(weightNumber) || weightNumber < 50) {
@@ -81,8 +81,17 @@ function HealthQuestionnairePage() {
       return false;
     }
     if (!form.blood_type || !form.rh_factor) {
-      setErrorMsg("Debés completar grupo sanguíneo y factor Rh.");
+      setErrorMsg("Debes completar grupo sanguíneo y factor Rh.");
       return false;
+    }
+    if (form.last_donation_date) {
+      const lastDate = new Date(form.last_donation_date);
+      const diffMs = Date.now() - lastDate.getTime();
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+      if (diffDays < 60) {
+        setErrorMsg("Deben pasar al menos 60 días desde la última donación.");
+        return false;
+      }
     }
     return true;
   };
@@ -91,9 +100,7 @@ function HealthQuestionnairePage() {
     e.preventDefault();
     setErrorMsg("");
     setMessage("");
-
     if (!validate()) return;
-
     try {
       const res = await createHealthQuestionnaire({
         ...form,
@@ -105,7 +112,7 @@ function HealthQuestionnairePage() {
     } catch (error) {
       const msg = getErrorMessage(
         error,
-        "Error al enviar el cuestionario. Intentalo de nuevo.",
+        "Error al enviar el cuestionario. Inténtalo de nuevo.",
       );
       setErrorMsg(msg);
     }
@@ -124,7 +131,18 @@ function HealthQuestionnairePage() {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit}>
+        {errorMsg && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errorMsg}
+          </Alert>
+        )}
+        {message && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {message}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit} noValidate>
           <TextField
             fullWidth
             label="Peso (kg)"
@@ -204,17 +222,6 @@ function HealthQuestionnairePage() {
               ))}
             </TextField>
           </Box>
-
-          {errorMsg && (
-            <Typography color="error" variant="body2" mt={1}>
-              {errorMsg}
-            </Typography>
-          )}
-          {message && (
-            <Typography color="primary" variant="body2" mt={1}>
-              {message}
-            </Typography>
-          )}
 
           <Button
             type="submit"

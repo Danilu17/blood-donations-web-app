@@ -6,8 +6,8 @@ const ProfileView = () => {
   const user = useSelector((state) => state.user);
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" fontWeight={600} mb={2}>
+    <Box sx={{ p: { xs: 2, md: 3 } }}>
+      <Typography variant="h4" fontWeight={600} mb={1}>
         Mi Perfil
       </Typography>
 
@@ -18,16 +18,16 @@ const ProfileView = () => {
 
       <Paper
         sx={{
-          maxWidth: 1000,
+          maxWidth: 900,
           mx: "auto",
-          p: 3,
-          borderRadius: 2,
+          p: { xs: 2, md: 3 },
+          borderRadius: 3,
+          boxShadow: 2,
+          bgcolor: "background.default",
         }}
-        elevation={0}
-        variant="outlined"
       >
-        <Grid container spacing={3}>
-          <Grid xs={12} md={6}>
+        <Grid container spacing={3} justifyContent="center">
+          <Grid item xs={12} md={6}>
             <ProfileCard user={user} />
           </Grid>
         </Grid>
