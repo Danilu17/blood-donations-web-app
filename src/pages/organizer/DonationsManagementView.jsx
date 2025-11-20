@@ -1,3 +1,4 @@
+// src/pages/organizer/DonationsManagementView.jsx
 import { Box, Typography, Paper, Button, Stack } from "@mui/material";
 import GenericTable from "../../components/tables/GenericTable";
 import { useParams } from "react-router-dom";
@@ -6,7 +7,8 @@ import DonationStatusDetails from "./DonationStatusDetails";
 
 const DonationsManagementView = () => {
   const { campaignId } = useParams();
-  const { donations, updateStatus } = useDonationsManagement(campaignId);
+  const { donations, isLoading, isError, updateStatus } =
+    useDonationsManagement(campaignId);
 
   const columns = [
     { id: "donorName", label: "Donante" },
@@ -14,10 +16,23 @@ const DonationsManagementView = () => {
     { id: "bloodType", label: "Grupo" },
     { id: "eligibilityStatus", label: "Elegibilidad" },
     { id: "registrationDate", label: "Fecha registro" },
-    { id: "donationStatus", label: "Estado" },
+    {
+      id: "donationStatus",
+      label: "Estado",
+      render: (row) => {
+        const label = row.donationStatus || "PENDING";
+        let color = "#6b7280";
+
+        if (label === "COMPLETED") color = "#16a34a";
+        if (label === "CANCELLED") color = "#dc2626";
+
+        return <span style={{ color }}>{label}</span>;
+      },
+    },
   ];
 
   const handleExport = () => {
+    // TODO: implementar export real
     alert("Exportar reporte (mock)");
   };
 
@@ -32,8 +47,8 @@ const DonationsManagementView = () => {
         subtitle="Marca qué donantes completaron o no su donación"
         columns={columns}
         data={donations}
-        isLoading={false}
-        isError={false}
+        isLoading={isLoading}
+        isError={isError}
       />
 
       <Stack direction="row" mt={2} mb={2} gap={2}>

@@ -13,17 +13,29 @@ export const donationsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Donations"],
     }),
 
-    // Opcional: listar donaciones de una campaña (si agregás filtro en backend)
-    getDonationsByCampaign: builder.query({
-      query: (campaignId) =>
-        `/donations?campaignId=${encodeURIComponent(campaignId)}`,
+    // Listar todas las donaciones (luego filtramos por campaña en el hook)
+    getDonations: builder.query({
+      query: () => ({
+        url: "/donations",
+        method: "GET",
+      }),
       providesTags: ["Donations"],
     }),
 
-    // Generar certificado para una donación ya creada
-    generateCertificate: builder.mutation({
-      query: (donationId) => ({
-        url: `/donations/${donationId}/certificate`,
+    // Marcar donación como completada
+    completeDonation: builder.mutation({
+      query: ({ id, quantity_ml }) => ({
+        url: `/donations/${id}/complete`,
+        method: "PATCH",
+        body: { quantity_ml },
+      }),
+      invalidatesTags: ["Donations"],
+    }),
+
+    // Generar certificado para una donación
+    generateDonationCertificate: builder.mutation({
+      query: (id) => ({
+        url: `/donations/${id}/certificate`,
         method: "GET",
       }),
       invalidatesTags: ["Donations", "Certificates"],
@@ -33,6 +45,7 @@ export const donationsApi = baseApi.injectEndpoints({
 
 export const {
   useCreateDonationMutation,
-  useGetDonationsByCampaignQuery,
+  useCompleteDonationMutation,
+  useGetDonationsQuery,
   useGenerateCertificateMutation,
 } = donationsApi;

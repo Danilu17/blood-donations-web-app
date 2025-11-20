@@ -1,22 +1,23 @@
+// src/routes/navigation/organizer.js
 const ORGANIZER_NAVIGATION = [
   {
     segment: "organizer",
-    title: "Mis Campañas",
+    title: "Mis campañas",
     icon: "",
   },
   {
-    segment: "organizer/create-campaign",
-    title: "Crear Campaña",
+    segment: "organizer/campaigns/new",
+    title: "Crear campaña",
     icon: "",
   },
   {
-    segment: "organizer/donations",
-    title: "Gestionar Donaciones",
+    segment: "organizer/blood-requests",
+    title: "Solicitudes de sangre",
     icon: "",
   },
   {
     segment: "organizer/profile",
-    title: "Mi Perfil",
+    title: "Mi perfil",
     icon: "",
   },
 ];

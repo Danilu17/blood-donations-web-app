@@ -1,7 +1,7 @@
 // src/pages/organizer/CreateCampaignView.jsx
 import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { Button, Typography, Paper, Box, Grid } from "@mui/material";
+import { Button, Paper, Box } from "@mui/material";
 
 import { useCreateCampaignMutation } from "../../apis/campaigns.api";
 import FormTextField from "../../components/forms/FormTextField";
@@ -50,78 +50,69 @@ function CreateCampaignView() {
         sx={{
           maxWidth: 1000,
           mx: "auto",
-          mt: 4,
           p: 3,
           bgcolor: "white",
           borderRadius: 2,
           border: "1px solid #e5e7eb",
         }}
       >
-        <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-          Crear campaña de donación
-        </Typography>
-
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <FormTextField
-                name="title"
-                label="Título de la campaña"
-                placeholder="Ej: Colecta en Hospital Central"
-                fullWidth
-              />
-            </Grid>
+          <FormTextField
+            name="title"
+            label="Título de la campaña"
+            placeholder="Ej: Colecta en Hospital Central"
+            fullWidth
+          />
 
-            <Grid item xs={12}>
-              <FormTextField
-                name="description"
-                label="Descripción"
-                placeholder="Breve descripción de la campaña..."
-                multiline
-                rows={3}
-                fullWidth
-              />
-            </Grid>
+          <Box sx={{ mb: 0 }}>
+            <FormTextField
+              name="description"
+              label="Descripción"
+              placeholder="Breve descripción de la campaña..."
+              multiline
+              rows={3}
+              fullWidth
+            />
+          </Box>
 
-            <Grid item xs={12} md={6}>
-              <FormTextField
-                name="start_date"
-                label="Fecha de inicio"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-              />
-            </Grid>
+          <Box sx={{ mb: 0 }}>
+            <FormTextField
+              name="start_date"
+              label="Fecha de inicio"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Box>
 
-            <Grid item xs={12} md={6}>
-              <FormTextField
-                name="end_date"
-                label="Fecha de fin"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                fullWidth
-              />
-            </Grid>
+          <Box sx={{ mb: 0 }}>
+            <FormTextField
+              name="end_date"
+              label="Fecha de fin"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+            />
+          </Box>
 
-            <Grid item xs={12}>
-              <FormTextField
-                name="location"
-                label="Lugar / Centro de donación"
-                placeholder="Ej: Hospital Italiano, Av. X 1234"
-                fullWidth
-              />
-            </Grid>
+          <Box sx={{ mb: 0 }}>
+            <FormTextField
+              name="location"
+              label="Lugar / Centro de donación"
+              placeholder="Ej: Hospital Italiano, Av. X 1234"
+              fullWidth
+            />
+          </Box>
 
-            <Grid item xs={12} md={6}>
-              <FormTextField
-                name="max_donors"
-                label="Cupo máximo de donantes"
-                type="number"
-                placeholder="Ej: 50"
-                fullWidth
-              />
-            </Grid>
-          </Grid>
+          <Box sx={{ mb: 0 }}>
+            <FormTextField
+              name="max_donors"
+              label="Cupo máximo de donantes"
+              type="number"
+              placeholder="Ej: 50"
+              fullWidth
+            />
+          </Box>
 
           <Box
             sx={{

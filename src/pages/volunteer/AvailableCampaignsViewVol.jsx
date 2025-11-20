@@ -16,13 +16,13 @@ import {
   People,
 } from "@mui/icons-material";
 import { useSelector } from "react-redux";
-import { useGetPublicCampaignsQuery } from "../../apis/campaigns.api";
+import { useGetCampaignsQuery } from "../../apis/campaigns.api";
 import { useRegisterVolunteerMutation } from "../../apis/volunteers.api";
 
 function AvailableCampaignsViewVol() {
   const userId = useSelector((state) => state.user.id);
 
-  const { data, isLoading, isError } = useGetPublicCampaignsQuery();
+  const { data, isLoading, isError } = useGetCampaignsQuery();
   const campaigns = data?.results || data?.items || data?.data || data || [];
 
   const [registerVolunteer] = useRegisterVolunteerMutation();

@@ -3,9 +3,10 @@ import { baseApi } from "./base.api";
 
 export const certificatesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Descargar un certificado existente por su ID
     downloadCertificate: builder.query({
-      query: (donationId) => ({
-        url: `/certificates/${donationId}`,
+      query: (certificateId) => ({
+        url: `/certificates/${certificateId}`,
         method: "GET",
         responseHandler: (response) => response.blob(),
       }),

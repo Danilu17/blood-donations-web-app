@@ -1,8 +1,8 @@
 // src/pages/donor/hooks/useMyDonationsListView.jsx
-import { useGetMyDonationsQuery } from "../../../apis/donations.api";
+import { useGetDonationsQuery } from "../../../apis/donations.api";
 
 function useMyDonationsListView(filters = {}, page = 1, limit = 5) {
-  const { data, isLoading, isError, error, refetch } = useGetMyDonationsQuery({
+  const { data, isLoading, isError, error, refetch } = useGetDonationsQuery({
     dateFrom: filters.dateFrom,
     dateTo: filters.dateTo,
     campaign: filters.campaign,

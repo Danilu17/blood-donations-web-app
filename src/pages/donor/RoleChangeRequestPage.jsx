@@ -16,8 +16,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import {
-  useRequestRoleChangeMutation,
   useGetMyRoleChangeRequestsQuery,
+  useReviewRoleChangeRequestMutation,
 } from "../../apis/role-change.api";
 
 /**
@@ -41,7 +41,7 @@ function RoleChangeRequestPage() {
   } = useGetMyRoleChangeRequestsQuery();
 
   const [requestRoleChange, { isLoading: submitting }] =
-    useRequestRoleChangeMutation();
+    useReviewRoleChangeRequestMutation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;

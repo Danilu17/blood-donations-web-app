@@ -3,14 +3,25 @@ import { baseApi } from "./base.api";
 
 export const volunteersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Para no romper código existente: devuelve la lista completa
     getMyVolunteerRegistrations: builder.query({
       query: () => ({
-        url: "/volunteers/me",
+        url: "/volunteers",
         method: "GET",
       }),
       providesTags: ["Volunteers"],
     }),
 
+    // Endpoint más genérico: listar voluntarios (ADMIN / ORGANIZER)
+    getVolunteers: builder.query({
+      query: () => ({
+        url: "/volunteers",
+        method: "GET",
+      }),
+      providesTags: ["Volunteers"],
+    }),
+
+    // ADMIN: convertir usuario en voluntario
     registerVolunteer: builder.mutation({
       query: (body) => ({
         url: "/volunteers",
@@ -24,5 +35,6 @@ export const volunteersApi = baseApi.injectEndpoints({
 
 export const {
   useGetMyVolunteerRegistrationsQuery,
+  useGetVolunteersQuery,
   useRegisterVolunteerMutation,
 } = volunteersApi;
